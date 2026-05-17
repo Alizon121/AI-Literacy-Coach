@@ -35,6 +35,12 @@ pip install ollama
 ollama pull llama3
 ```
 
+Start ollama using 
+
+```bash
+ollama serve
+```
+
 ### 2. Start the backend
 
 ```bash
