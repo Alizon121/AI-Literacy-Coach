@@ -7,7 +7,7 @@ const DEFAULTS: Settings = {
   triggerDelay: 800,
   suspendInIncognito: true,
   backgroundActivity: false,
-  model: "llama3",
+  model: "phi4-mini",
   serverPort: 8000,
   enabledSites: {
     "claude.ai": true,

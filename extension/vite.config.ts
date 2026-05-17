@@ -9,6 +9,7 @@ export default defineConfig({
     crx({ manifest }),
   ],
   server: {
+    port: 5173,
     cors: true,
   },
 });

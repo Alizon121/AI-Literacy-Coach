@@ -70,7 +70,7 @@ SENSITIVITY_ADDENDUM: dict[int, str] = {
 
 class PromptRequest(BaseModel):
     prompt: str
-    model: str = "llama3"
+    model: str = "phi4-mini"
     sensitivity: int = 2  # 1=low, 2=medium, 3=high
 
 
