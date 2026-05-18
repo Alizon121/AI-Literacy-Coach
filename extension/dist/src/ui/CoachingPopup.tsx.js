@@ -1,4 +1,4 @@
-import { createHotContext as __vite__createHotContext } from "/vendor/vite-client.js";import.meta.hot = __vite__createHotContext("/src/ui/CoachingPopup.tsx.js");import __vite__cjsImport0_react_jsxDevRuntime from "/vendor/.vite-deps-react_jsx-dev-runtime.js__v--edd43287.js"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import { createHotContext as __vite__createHotContext } from "/vendor/vite-client.js";import.meta.hot = __vite__createHotContext("/src/ui/CoachingPopup.tsx.js");import __vite__cjsImport0_react_jsxDevRuntime from "/vendor/.vite-deps-react_jsx-dev-runtime.js__v--f4442258.js"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
 import * as RefreshRuntime from "/vendor/react-refresh.js";
 const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
 let prevRefreshReg;
@@ -15,7 +15,7 @@ if (import.meta.hot && !inWebWorker) {
   window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
 }
 var _s = $RefreshSig$();
-import __vite__cjsImport3_react from "/vendor/.vite-deps-react.js__v--edd43287.js"; const useState = __vite__cjsImport3_react["useState"];
+import __vite__cjsImport3_react from "/vendor/.vite-deps-react.js__v--f4442258.js"; const useState = __vite__cjsImport3_react["useState"];
 export function CoachingPopup({ suggestion, onApply, onDismiss }) {
   _s();
   const [collapsed, setCollapsed] = useState(false);

@@ -1,5 +1,5 @@
-import __vite__cjsImport0_react_jsxDevRuntime from "/vendor/.vite-deps-react_jsx-dev-runtime.js__v--edd43287.js"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
-import __vite__cjsImport1_reactDom_client from "/vendor/.vite-deps-react-dom_client.js__v--edd43287.js"; const createRoot = __vite__cjsImport1_reactDom_client["createRoot"];
+import __vite__cjsImport0_react_jsxDevRuntime from "/vendor/.vite-deps-react_jsx-dev-runtime.js__v--f4442258.js"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import __vite__cjsImport1_reactDom_client from "/vendor/.vite-deps-react-dom_client.js__v--f4442258.js"; const createRoot = __vite__cjsImport1_reactDom_client["createRoot"];
 import { CoachingPopup } from "/src/ui/CoachingPopup.tsx.js";
 import { injectSuggestedText } from "/src/utils/textInjector.ts.js";
 import { suppressNextEvaluation } from "/src/content/observer.ts.js";

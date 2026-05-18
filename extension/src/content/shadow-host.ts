@@ -36,7 +36,9 @@ function trackPosition(host: HTMLElement, inputEl: HTMLElement): () => void {
   const reposition = () => {
     const rect = inputEl.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom;
-    const popupHeight = 320;
+    // Use the actual rendered height of the host; fall back to an estimate
+    // before React has painted the first frame (offsetHeight === 0).
+    const popupHeight = host.offsetHeight || 320;
 
     if (spaceBelow < popupHeight + 16) {
       host.style.top = `${rect.top - popupHeight - 8}px`;
@@ -48,6 +50,9 @@ function trackPosition(host: HTMLElement, inputEl: HTMLElement): () => void {
 
   const resizeObserver = new ResizeObserver(reposition);
   resizeObserver.observe(inputEl);
+  // Also observe the host so position updates once React renders the popup content
+  // and the true height is known.
+  resizeObserver.observe(host);
   window.addEventListener("scroll", reposition, { passive: true });
   window.addEventListener("resize", reposition, { passive: true });
 
