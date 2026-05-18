@@ -2,6 +2,7 @@ import __vite__cjsImport0_react_jsxDevRuntime from "/vendor/.vite-deps-react_jsx
 import __vite__cjsImport1_reactDom_client from "/vendor/.vite-deps-react-dom_client.js__v--edd43287.js"; const createRoot = __vite__cjsImport1_reactDom_client["createRoot"];
 import { CoachingPopup } from "/src/ui/CoachingPopup.tsx.js";
 import { injectSuggestedText } from "/src/utils/textInjector.ts.js";
+import { suppressNextEvaluation } from "/src/content/observer.ts.js";
 export function mountPopup(shadow, suggestion, inputEl, onDismiss) {
   const container = document.createElement("div");
   container.style.pointerEvents = "all";
@@ -13,6 +14,7 @@ export function mountPopup(shadow, suggestion, inputEl, onDismiss) {
       {
         suggestion,
         onApply: (suggestedText) => {
+          suppressNextEvaluation();
           injectSuggestedText(inputEl, suggestedText);
           chrome.runtime.sendMessage({ type: "SUGGESTION_ACCEPTED" });
           onDismiss();
@@ -26,7 +28,7 @@ export function mountPopup(shadow, suggestion, inputEl, onDismiss) {
       false,
       {
         fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
-        lineNumber: 19,
+        lineNumber: 20,
         columnNumber: 5
       },
       this

@@ -4,7 +4,7 @@ const DEFAULTS: Settings = {
   coachingEnabled: true,
   toolbarVisible: true,
   sensitivity: 2,
-  triggerDelay: 800,
+  triggerDelay: 1500,
   suspendInIncognito: true,
   backgroundActivity: false,
   model: "phi4-mini",

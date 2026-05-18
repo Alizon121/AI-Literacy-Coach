@@ -5,8 +5,13 @@ import type { EvaluationResult } from "../types";
 
 let debounceTimer: ReturnType<typeof setTimeout>;
 let lastEvaluatedPrompt = "";
-let triggerDelay = 800;
+let triggerDelay = 1500;
 let mutationObserver: MutationObserver | null = null;
+let suppressNext = false;
+
+export function suppressNextEvaluation(): void {
+  suppressNext = true;
+}
 
 const attachedInputs = new WeakSet<HTMLElement>();
 
@@ -45,6 +50,11 @@ function attachListener(input: HTMLElement): void {
 
     debounceTimer = setTimeout(async () => {
       const text = input.innerText || (input as HTMLInputElement).value || "";
+      if (suppressNext) {
+        suppressNext = false;
+        lastEvaluatedPrompt = text;
+        return;
+      }
       if (!isWorthEvaluating(text, lastEvaluatedPrompt)) return;
       lastEvaluatedPrompt = text;
 

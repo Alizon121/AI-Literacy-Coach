@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { CoachingPopup } from "../ui/CoachingPopup";
 import { injectSuggestedText } from "../utils/textInjector";
+import { suppressNextEvaluation } from "./observer";
 import type { CoachingResponse } from "../types";
 
 export function mountPopup(
@@ -19,6 +20,7 @@ export function mountPopup(
     <CoachingPopup
       suggestion={suggestion}
       onApply={(suggestedText) => {
+        suppressNextEvaluation();
         injectSuggestedText(inputEl, suggestedText);
         chrome.runtime.sendMessage({ type: "SUGGESTION_ACCEPTED" });
         onDismiss();

@@ -3,8 +3,12 @@ import { isWorthEvaluating } from "/src/utils/preFilter.ts.js";
 import { showCoachingPopup, dismissPopup } from "/src/content/popup-manager.ts.js";
 let debounceTimer;
 let lastEvaluatedPrompt = "";
-let triggerDelay = 800;
+let triggerDelay = 1500;
 let mutationObserver = null;
+let suppressNext = false;
+export function suppressNextEvaluation() {
+  suppressNext = true;
+}
 const attachedInputs = /* @__PURE__ */ new WeakSet();
 export function updateDebounceDelay(delay) {
   triggerDelay = delay;
@@ -34,6 +38,11 @@ function attachListener(input) {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(async () => {
       const text = input.innerText || input.value || "";
+      if (suppressNext) {
+        suppressNext = false;
+        lastEvaluatedPrompt = text;
+        return;
+      }
       if (!isWorthEvaluating(text, lastEvaluatedPrompt)) return;
       lastEvaluatedPrompt = text;
       const result = await chrome.runtime.sendMessage({
