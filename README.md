@@ -22,7 +22,7 @@ AI-literacy-coach/
 
 **Call flow:** User types → `observer.ts` debounces → sends `EVALUATE_PROMPT` to service worker → service worker calls FastAPI → FastAPI calls Ollama → result returned to observer → popup rendered via Shadow DOM.
 
-## Setup
+## Setup (Power Users)
 
 ### 1. Install Ollama
 
@@ -32,7 +32,7 @@ Then install the Python SDK and pull the model:
 
 ```bash
 pip install ollama
-ollama pull llama3
+ollama pull llama3 (or wahtever llama model you prefer)
 ```
 
 Start ollama using 
@@ -57,7 +57,6 @@ The server runs at `http://localhost:8000`. Verify it's up: `curl http://localho
 cd extension
 npm install
 npm run dev       # dev mode with hot reload
-npm run build     # production build → dist/
 ```
 
 ### 4. Load in Chrome
@@ -66,12 +65,6 @@ npm run build     # production build → dist/
 2. Enable **Developer mode**
 3. Click **Load unpacked** and select the `extension/dist/` folder
 
-### 5. Add icons (required for production)
-
-Place PNG files in `extension/public/icons/`:
-- `icon-16.png`, `icon-32.png`, `icon-48.png`, `icon-128.png`
-
-In development, Chrome will load the extension without icons (grey default icon shown).
 
 ## Supported platforms
 
@@ -82,4 +75,11 @@ Claude.ai · ChatGPT · Gemini · Perplexity · Mistral · Microsoft Copilot
 - All prompt data stays on your device — nothing is sent to external servers.
 - The extension fails silently if the backend is offline; check the browser console for setup instructions.
 - To add Firefox support, add the `browser_specific_settings` gecko block to `manifest.json`.
+
 # AI-Literacy-Coach
+
+## Setup (Non-power Users)
+- Install the extension from Google Chrome Web Store
+    - The extension will work out of the box and use thr groq api to handle prompt generation.
+
+- 
