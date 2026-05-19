@@ -1,7 +1,19 @@
 import { createShadowHost } from "/src/content/shadow-host.ts.js";
-import { mountPopup } from "/src/content/popup-renderer.tsx.js";
+import { mountPopup, mountRateLimitMessage } from "/src/content/popup-renderer.tsx.js";
 let activePopup = null;
 let autoDismissTimer = null;
+const stateListeners = /* @__PURE__ */ new Set();
+export function isPopupActive() {
+  return activePopup !== null;
+}
+export function onPopupStateChange(listener) {
+  stateListeners.add(listener);
+  return () => stateListeners.delete(listener);
+}
+function notifyStateChange() {
+  const active = activePopup !== null;
+  stateListeners.forEach((l) => l(active));
+}
 export function showCoachingPopup(suggestion, inputEl) {
   dismissPopup();
   const { host, shadow, stopTracking } = createShadowHost(inputEl);
@@ -18,6 +30,23 @@ export function showCoachingPopup(suggestion, inputEl) {
   }
   document.addEventListener("click", handleOutsideClick);
   document.addEventListener("keydown", handleEscapeKey);
+  notifyStateChange();
+}
+export function showRateLimitPopup(resetInSeconds, inputEl) {
+  dismissPopup();
+  const { host, shadow, stopTracking } = createShadowHost(inputEl);
+  const unmount = mountRateLimitMessage(shadow, resetInSeconds, dismissPopup);
+  activePopup = {
+    host,
+    cleanup: () => {
+      unmount();
+      stopTracking();
+    }
+  };
+  autoDismissTimer = setTimeout(dismissPopup, 8e3);
+  document.addEventListener("click", handleOutsideClick);
+  document.addEventListener("keydown", handleEscapeKey);
+  notifyStateChange();
 }
 export function dismissPopup() {
   if (autoDismissTimer !== null) {
@@ -30,6 +59,7 @@ export function dismissPopup() {
   activePopup = null;
   document.removeEventListener("click", handleOutsideClick);
   document.removeEventListener("keydown", handleEscapeKey);
+  notifyStateChange();
 }
 function handleOutsideClick(e) {
   if (!activePopup) return;

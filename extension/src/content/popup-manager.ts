@@ -1,5 +1,5 @@
 import { createShadowHost } from "./shadow-host";
-import { mountPopup } from "./popup-renderer";
+import { mountPopup, mountRateLimitMessage } from "./popup-renderer";
 import type { CoachingResponse } from "../types";
 
 interface PopupInstance {
@@ -9,6 +9,23 @@ interface PopupInstance {
 
 let activePopup: PopupInstance | null = null;
 let autoDismissTimer: ReturnType<typeof setTimeout> | null = null;
+
+type StateListener = (active: boolean) => void;
+const stateListeners = new Set<StateListener>();
+
+export function isPopupActive(): boolean {
+  return activePopup !== null;
+}
+
+export function onPopupStateChange(listener: StateListener): () => void {
+  stateListeners.add(listener);
+  return () => stateListeners.delete(listener);
+}
+
+function notifyStateChange(): void {
+  const active = activePopup !== null;
+  stateListeners.forEach((l) => l(active));
+}
 
 export function showCoachingPopup(suggestion: CoachingResponse, inputEl: HTMLElement): void {
   dismissPopup();
@@ -30,6 +47,28 @@ export function showCoachingPopup(suggestion: CoachingResponse, inputEl: HTMLEle
 
   document.addEventListener("click", handleOutsideClick);
   document.addEventListener("keydown", handleEscapeKey);
+  notifyStateChange();
+}
+
+export function showRateLimitPopup(resetInSeconds: number, inputEl: HTMLElement): void {
+  dismissPopup();
+
+  const { host, shadow, stopTracking } = createShadowHost(inputEl);
+  const unmount = mountRateLimitMessage(shadow, resetInSeconds, dismissPopup);
+
+  activePopup = {
+    host,
+    cleanup: () => {
+      unmount();
+      stopTracking();
+    },
+  };
+
+  autoDismissTimer = setTimeout(dismissPopup, 8000);
+
+  document.addEventListener("click", handleOutsideClick);
+  document.addEventListener("keydown", handleEscapeKey);
+  notifyStateChange();
 }
 
 export function dismissPopup(): void {
@@ -46,6 +85,7 @@ export function dismissPopup(): void {
 
   document.removeEventListener("click", handleOutsideClick);
   document.removeEventListener("keydown", handleEscapeKey);
+  notifyStateChange();
 }
 
 function handleOutsideClick(e: MouseEvent): void {

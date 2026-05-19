@@ -3,6 +3,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 vi.mock("../content/popup-manager", () => ({
   showCoachingPopup: vi.fn(),
   dismissPopup: vi.fn(),
+  isPopupActive: vi.fn(() => false),
+  onPopupStateChange: vi.fn(() => vi.fn()),
+}));
+
+vi.mock("../content/toggle-button", () => ({
+  createToggleButton: vi.fn(() => ({ setActive: vi.fn(), destroy: vi.fn() })),
 }));
 
 describe("observer — suppressNextEvaluation", () => {

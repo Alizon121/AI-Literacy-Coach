@@ -8,6 +8,8 @@ export interface CoachingResponse {
 export interface EvaluationResult {
   payload: CoachingResponse | null;
   serverOffline?: boolean;
+  rateLimitExceeded?: boolean;
+  rateLimitResetInSeconds?: number;
 }
 
 export interface Settings {

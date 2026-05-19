@@ -2,8 +2,6 @@ import { watchForInputFields, teardownObserver, updateDebounceDelay } from "./ob
 import { dismissPopup } from "./popup-manager";
 import type { Settings } from "../types";
 
-let currentInput: HTMLElement | null = null;
-
 async function init(): Promise<void> {
   const response = await chrome.runtime.sendMessage({ type: "INIT_TAB" });
   const settings: Settings = response.settings;
@@ -20,7 +18,7 @@ async function init(): Promise<void> {
   }
 
   if (settings.coachingEnabled && serverOnline) {
-    watchForInputFields((input) => { currentInput = input; });
+    watchForInputFields(() => {});
   }
 }
 
@@ -32,7 +30,7 @@ chrome.runtime.onMessage.addListener((message) => {
       if ("coachingEnabled" in changes) {
         const enabled = changes.coachingEnabled.newValue as boolean;
         if (enabled) {
-          watchForInputFields((input) => { currentInput = input; });
+          watchForInputFields(() => {});
         } else {
           teardownObserver();
           dismissPopup();

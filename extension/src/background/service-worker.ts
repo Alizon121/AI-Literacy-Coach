@@ -35,6 +35,13 @@ chrome.storage.onChanged.addListener((changes, area) => {
   });
 });
 
+function secondsUntilMidnightUTC(): number {
+  const now = new Date();
+  const midnight = new Date();
+  midnight.setUTCHours(24, 0, 0, 0);
+  return Math.floor((midnight.getTime() - now.getTime()) / 1000);
+}
+
 async function checkServerHealth(): Promise<boolean> {
   try {
     const settings = await getSettings();
@@ -58,6 +65,14 @@ async function handleEvaluation(prompt: string): Promise<EvaluationResult> {
       body: JSON.stringify({ prompt, model: settings.model, sensitivity: settings.sensitivity }),
       signal: AbortSignal.timeout(15000),
     });
+
+    if (res.status === 429) {
+      const retryAfter = res.headers.get("retry-after");
+      const resetInSeconds = retryAfter
+        ? parseInt(retryAfter, 10)
+        : secondsUntilMidnightUTC();
+      return { payload: null, rateLimitExceeded: true, rateLimitResetInSeconds: resetInSeconds };
+    }
 
     if (!res.ok) return { payload: null };
 
