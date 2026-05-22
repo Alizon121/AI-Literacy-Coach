@@ -32,6 +32,12 @@ export function createToggleButton(
     e.stopPropagation();
     onClick();
   });
+
+  const tooltip = document.createElement("div");
+  tooltip.className = "tooltip";
+  tooltip.textContent = "Get AI feedback on your prompt";
+  button.appendChild(tooltip);
+
   shadow.appendChild(button);
 
   document.body.appendChild(host);
@@ -68,10 +74,10 @@ function styles(): string {
     .coach-toggle {
       width: ${SIZE}px;
       height: ${SIZE}px;
-      border-radius: 50%;
-      border: none;
-      background: #6b7280;
-      color: #fff;
+      border-radius: 40%;
+      border: grey 0.1px solid;
+      background: #fff;
+      color: #3b82f6;
       font-size: 9px;
       font-weight: 700;
       font-family: system-ui, -apple-system, sans-serif;
@@ -82,6 +88,7 @@ function styles(): string {
       align-items: center;
       justify-content: center;
       opacity: 0.65;
+      position: relative;
       transition: opacity 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
       box-shadow: 0 1px 4px rgba(0,0,0,0.25);
     }
@@ -90,9 +97,34 @@ function styles(): string {
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     }
     .coach-toggle.active {
-      background: #2563eb;
+      background: #3b82f6;
+      color: #fff;
       opacity: 1;
       box-shadow: 0 2px 6px rgba(37,99,235,0.4);
+    }
+    .tooltip {
+      visibility: hidden;
+      width: max-content;
+      max-width: 200px;
+      background-color: #333;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 400;
+      text-align: center;
+      border-radius: 4px;
+      padding: 5px 8px;
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      pointer-events: none;
+      white-space: nowrap;
+      transition: opacity 0.2s ease 1s;
+    }
+    .coach-toggle:hover .tooltip {
+      visibility: visible;
+      opacity: 1;
     }
   `;
 }
