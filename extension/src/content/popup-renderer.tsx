@@ -12,6 +12,39 @@ function formatResetTime(seconds: number): string {
   return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
 }
 
+function NoChangesMessage({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <div className="popup">
+      <div className="popup-header">
+        <div className="popup-header-left">
+          <span>AI Literacy Coach</span>
+        </div>
+        <button className="icon-btn" aria-label="Close" onClick={onDismiss}>✕</button>
+      </div>
+      <div className="popup-body">
+        <p>Prompt isn't long enough to assess. Keep typing to get prompt suggestions.</p>
+      </div>
+    </div>
+  );
+}
+
+export function mountNoChangesMessage(
+  shadow: ShadowRoot,
+  onDismiss: () => void
+): () => void {
+  const container = document.createElement("div");
+  container.style.pointerEvents = "all";
+  shadow.appendChild(container);
+
+  const root = createRoot(container);
+  root.render(<NoChangesMessage onDismiss={onDismiss} />);
+
+  return () => {
+    root.unmount();
+    container.remove();
+  };
+}
+
 function RateLimitMessage({ resetInSeconds, onDismiss }: { resetInSeconds: number; onDismiss: () => void }) {
   return (
     <div className="popup">

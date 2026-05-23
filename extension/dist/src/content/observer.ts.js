@@ -1,6 +1,6 @@
 import { findActiveInput } from "/src/utils/inputDetector.ts.js";
 import { isWorthEvaluating } from "/src/utils/preFilter.ts.js";
-import { showCoachingPopup, showRateLimitPopup, dismissPopup, isPopupActive, onPopupStateChange } from "/src/content/popup-manager.ts.js";
+import { showCoachingPopup, showRateLimitPopup, showNoChangesPopup, dismissPopup, isPopupActive, onPopupStateChange } from "/src/content/popup-manager.ts.js";
 import { createToggleButton } from "/src/content/toggle-button.ts.js";
 import { maybeStartTutorial } from "/src/content/tutorial-manager.ts.js";
 let debounceTimer;
@@ -45,7 +45,10 @@ function attachListener(input) {
       return;
     }
     const text = input.innerText || input.value || "";
-    if (text.length < 15) return;
+    if (text.length < 10) {
+      showNoChangesPopup(input);
+      return;
+    }
     lastEvaluatedPrompt = text;
     const result = await chrome.runtime.sendMessage({
       type: "EVALUATE_PROMPT",

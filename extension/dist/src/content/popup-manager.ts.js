@@ -1,5 +1,5 @@
 import { createShadowHost } from "/src/content/shadow-host.ts.js";
-import { mountPopup, mountRateLimitMessage } from "/src/content/popup-renderer.tsx.js";
+import { mountPopup, mountRateLimitMessage, mountNoChangesMessage } from "/src/content/popup-renderer.tsx.js";
 let activePopup = null;
 let autoDismissTimer = null;
 const stateListeners = /* @__PURE__ */ new Set();
@@ -28,6 +28,22 @@ export function showCoachingPopup(suggestion, inputEl) {
   if (!suggestion.needs_improvement) {
     autoDismissTimer = setTimeout(dismissPopup, 4e3);
   }
+  document.addEventListener("click", handleOutsideClick);
+  document.addEventListener("keydown", handleEscapeKey);
+  notifyStateChange();
+}
+export function showNoChangesPopup(inputEl) {
+  dismissPopup();
+  const { host, shadow, stopTracking } = createShadowHost(inputEl);
+  const unmount = mountNoChangesMessage(shadow, dismissPopup);
+  activePopup = {
+    host,
+    cleanup: () => {
+      unmount();
+      stopTracking();
+    }
+  };
+  autoDismissTimer = setTimeout(dismissPopup, 4e3);
   document.addEventListener("click", handleOutsideClick);
   document.addEventListener("keydown", handleEscapeKey);
   notifyStateChange();

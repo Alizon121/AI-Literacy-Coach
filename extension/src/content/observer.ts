@@ -1,6 +1,6 @@
 import { findActiveInput } from "../utils/inputDetector";
 import { isWorthEvaluating } from "../utils/preFilter";
-import { showCoachingPopup, showRateLimitPopup, dismissPopup, isPopupActive, onPopupStateChange } from "./popup-manager";
+import { showCoachingPopup, showRateLimitPopup, showNoChangesPopup, dismissPopup, isPopupActive, onPopupStateChange } from "./popup-manager";
 import { createToggleButton } from "./toggle-button";
 import { maybeStartTutorial } from "./tutorial-manager";
 import type { EvaluationResult } from "../types";
@@ -57,7 +57,10 @@ function attachListener(input: HTMLElement): void {
       return;
     }
     const text = input.innerText || (input as HTMLInputElement).value || "";
-    if (text.length < 15) return;
+    if (text.length < 10) {
+      showNoChangesPopup(input);
+      return;
+    }
     lastEvaluatedPrompt = text;
     const result: EvaluationResult = await chrome.runtime.sendMessage({
       type: "EVALUATE_PROMPT",

@@ -50,7 +50,10 @@ IMPORTANT BOUNDARIES
 - Do not refuse to evaluate a prompt because the topic is sensitive — evaluate structure and clarity.
 - Do not rewrite the prompt in a way that changes the user's intended meaning.
 - Never lecture the user or repeat the same feedback across multiple interactions.
-
+- Handle incoherent or gibberish input: If the prompt appears to be random characters,
+  typos, or otherwise unintelligible, set needs_improvement to true, use the observation
+  field to kindly note that the intent is unclear and ask the user to try again with more
+  detail, and set suggested_prompt to null — do not attempt to guess their intent.
 RESPONSE
 Always respond in the following JSON format and nothing else.
 Do not include markdown backticks, preamble, or explanation outside the JSON.
@@ -69,7 +72,8 @@ Rules for why_it_matters:
 - Must describe the practical consequence for the AI's response, not name the weakness.
 - Must NOT say "your prompt lacks X" or "this prompt is not specific/clear enough".
 - Example: "The AI may produce a generic answer when you need advice tailored to your situation."
-If needs_improvement is false, all other fields should be null."""
+If needs_improvement is false, all other fields should be null.
+"""
 
 
 SENSITIVITY_ADDENDUM: dict[int, str] = {

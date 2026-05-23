@@ -28,8 +28,8 @@ export function createToggleButton(inputEl, onClick) {
   document.body.appendChild(host);
   const reposition = () => {
     const rect = inputEl.getBoundingClientRect();
-    host.style.top = `${rect.bottom - SIZE - 8}px`;
-    host.style.left = `${rect.right - SIZE - 8}px`;
+    host.style.top = `${rect.top + 2}px`;
+    host.style.left = `${rect.right - SIZE - 20}px`;
   };
   reposition();
   const resizeObserver = new ResizeObserver(reposition);
@@ -78,10 +78,14 @@ function styles() {
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     }
     .coach-toggle.active {
-      background: #3b82f6;
-      color: #fff;
-      opacity: 1;
+      border: #3b82f6 0.1px solid;
+      color: #3b82f6;
+      opacity: 0.5;
       box-shadow: 0 2px 6px rgba(37,99,235,0.4);
+    }
+    .coach-toggle.active:hover {
+      opacity: 1;
+      box-shadow: 0 4px 12px rgba(37,99,235,0.5);
     }
     .tooltip {
       visibility: hidden;

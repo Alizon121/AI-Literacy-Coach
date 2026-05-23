@@ -25,28 +25,21 @@ function formatResetTime(seconds) {
   if (hours >= 1) return `${hours} hour${hours !== 1 ? "s" : ""}`;
   return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
 }
-function RateLimitMessage({ resetInSeconds, onDismiss }) {
+function NoChangesMessage({ onDismiss }) {
   return /* @__PURE__ */ jsxDEV("div", { className: "popup", children: [
     /* @__PURE__ */ jsxDEV("div", { className: "popup-header", children: [
-      /* @__PURE__ */ jsxDEV("div", { className: "popup-header-left", children: [
-        /* @__PURE__ */ jsxDEV("span", { children: "AI Literacy Coach" }, void 0, false, {
-          fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
-          lineNumber: 39,
-          columnNumber: 11
-        }, this),
-        /* @__PURE__ */ jsxDEV("span", { className: "badge badge-warn", children: "limit reached" }, void 0, false, {
-          fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
-          lineNumber: 40,
-          columnNumber: 11
-        }, this)
-      ] }, void 0, true, {
+      /* @__PURE__ */ jsxDEV("div", { className: "popup-header-left", children: /* @__PURE__ */ jsxDEV("span", { children: "AI Literacy Coach" }, void 0, false, {
+        fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
+        lineNumber: 39,
+        columnNumber: 11
+      }, this) }, void 0, false, {
         fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
         lineNumber: 38,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ jsxDEV("button", { className: "icon-btn", "aria-label": "Close", onClick: onDismiss, children: "✕" }, void 0, false, {
         fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
-        lineNumber: 42,
+        lineNumber: 41,
         columnNumber: 9
       }, this)
     ] }, void 0, true, {
@@ -54,17 +47,13 @@ function RateLimitMessage({ resetInSeconds, onDismiss }) {
       lineNumber: 37,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV("div", { className: "popup-body", children: /* @__PURE__ */ jsxDEV("p", { children: [
-      "Daily token limit reached. Try again in ",
-      formatResetTime(resetInSeconds),
-      "."
-    ] }, void 0, true, {
+    /* @__PURE__ */ jsxDEV("div", { className: "popup-body", children: /* @__PURE__ */ jsxDEV("p", { children: "Prompt isn't long enough to assess. Keep typing to get prompt suggestions." }, void 0, false, {
       fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
-      lineNumber: 45,
+      lineNumber: 44,
       columnNumber: 9
     }, this) }, void 0, false, {
       fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
-      lineNumber: 44,
+      lineNumber: 43,
       columnNumber: 7
     }, this)
   ] }, void 0, true, {
@@ -73,7 +62,71 @@ function RateLimitMessage({ resetInSeconds, onDismiss }) {
     columnNumber: 5
   }, this);
 }
-_c = RateLimitMessage;
+_c = NoChangesMessage;
+export function mountNoChangesMessage(shadow, onDismiss) {
+  const container = document.createElement("div");
+  container.style.pointerEvents = "all";
+  shadow.appendChild(container);
+  const root = createRoot(container);
+  root.render(/* @__PURE__ */ jsxDEV(NoChangesMessage, { onDismiss }, void 0, false, {
+    fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
+    lineNumber: 59,
+    columnNumber: 15
+  }, this));
+  return () => {
+    root.unmount();
+    container.remove();
+  };
+}
+function RateLimitMessage({ resetInSeconds, onDismiss }) {
+  return /* @__PURE__ */ jsxDEV("div", { className: "popup", children: [
+    /* @__PURE__ */ jsxDEV("div", { className: "popup-header", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "popup-header-left", children: [
+        /* @__PURE__ */ jsxDEV("span", { children: "AI Literacy Coach" }, void 0, false, {
+          fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
+          lineNumber: 72,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("span", { className: "badge badge-warn", children: "limit reached" }, void 0, false, {
+          fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
+          lineNumber: 73,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
+        lineNumber: 71,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("button", { className: "icon-btn", "aria-label": "Close", onClick: onDismiss, children: "✕" }, void 0, false, {
+        fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
+        lineNumber: 75,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
+      lineNumber: 70,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "popup-body", children: /* @__PURE__ */ jsxDEV("p", { children: [
+      "Daily token limit reached. Try again in ",
+      formatResetTime(resetInSeconds),
+      "."
+    ] }, void 0, true, {
+      fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
+      lineNumber: 78,
+      columnNumber: 9
+    }, this) }, void 0, false, {
+      fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
+      lineNumber: 77,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
+    lineNumber: 69,
+    columnNumber: 5
+  }, this);
+}
+_c2 = RateLimitMessage;
 export function mountRateLimitMessage(shadow, resetInSeconds, onDismiss) {
   const container = document.createElement("div");
   container.style.pointerEvents = "all";
@@ -81,7 +134,7 @@ export function mountRateLimitMessage(shadow, resetInSeconds, onDismiss) {
   const root = createRoot(container);
   root.render(/* @__PURE__ */ jsxDEV(RateLimitMessage, { resetInSeconds, onDismiss }, void 0, false, {
     fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
-    lineNumber: 61,
+    lineNumber: 94,
     columnNumber: 15
   }, this));
   return () => {
@@ -114,7 +167,7 @@ export function mountPopup(shadow, suggestion, inputEl, onDismiss) {
       false,
       {
         fileName: "/Users/andrewlizon/Desktop/Projects/AI-literacy-coach/extension/src/content/popup-renderer.tsx",
-        lineNumber: 82,
+        lineNumber: 115,
         columnNumber: 5
       },
       this
@@ -125,8 +178,9 @@ export function mountPopup(shadow, suggestion, inputEl, onDismiss) {
     container.remove();
   };
 }
-var _c;
-$RefreshReg$(_c, "RateLimitMessage");
+var _c, _c2;
+$RefreshReg$(_c, "NoChangesMessage");
+$RefreshReg$(_c2, "RateLimitMessage");
 if (import.meta.hot && !inWebWorker) {
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
