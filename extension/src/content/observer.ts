@@ -2,6 +2,7 @@ import { findActiveInput } from "../utils/inputDetector";
 import { isWorthEvaluating } from "../utils/preFilter";
 import { showCoachingPopup, showRateLimitPopup, dismissPopup, isPopupActive, onPopupStateChange } from "./popup-manager";
 import { createToggleButton } from "./toggle-button";
+import { maybeStartTutorial } from "./tutorial-manager";
 import type { EvaluationResult } from "../types";
 
 let debounceTimer: ReturnType<typeof setTimeout>;
@@ -68,6 +69,8 @@ function attachListener(input: HTMLElement): void {
     }
     if (result?.payload) showCoachingPopup(result.payload, input);
   });
+
+  maybeStartTutorial(button.anchorEl);
 
   const unsubscribe = onPopupStateChange((active) => button.setActive(active));
   activeButtons.push({

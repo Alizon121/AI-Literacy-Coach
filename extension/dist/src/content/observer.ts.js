@@ -2,6 +2,7 @@ import { findActiveInput } from "/src/utils/inputDetector.ts.js";
 import { isWorthEvaluating } from "/src/utils/preFilter.ts.js";
 import { showCoachingPopup, showRateLimitPopup, dismissPopup, isPopupActive, onPopupStateChange } from "/src/content/popup-manager.ts.js";
 import { createToggleButton } from "/src/content/toggle-button.ts.js";
+import { maybeStartTutorial } from "/src/content/tutorial-manager.ts.js";
 let debounceTimer;
 let lastEvaluatedPrompt = "";
 let triggerDelay = 1500;
@@ -56,6 +57,7 @@ function attachListener(input) {
     }
     if (result?.payload) showCoachingPopup(result.payload, input);
   });
+  maybeStartTutorial(button.anchorEl);
   const unsubscribe = onPopupStateChange((active) => button.setActive(active));
   activeButtons.push({
     destroy: () => {

@@ -1,6 +1,7 @@
 export interface ToggleButton {
   setActive: (active: boolean) => void;
   destroy: () => void;
+  anchorEl: HTMLElement;
 }
 
 const SIZE = 28;
@@ -56,6 +57,7 @@ export function createToggleButton(
   window.addEventListener("resize", reposition, { passive: true });
 
   return {
+    anchorEl: host,
     setActive: (active: boolean) => {
       button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", String(active));
