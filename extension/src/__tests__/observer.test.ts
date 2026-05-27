@@ -8,7 +8,12 @@ vi.mock("../content/popup-manager", () => ({
 }));
 
 vi.mock("../content/toggle-button", () => ({
-  createToggleButton: vi.fn(() => ({ setActive: vi.fn(), destroy: vi.fn() })),
+  createToggleButton: vi.fn(() => ({
+    setActive: vi.fn(),
+    setPaused: vi.fn(),
+    destroy: vi.fn(),
+    anchorEl: document.createElement("div"),
+  })),
 }));
 
 describe("observer — suppressNextEvaluation", () => {

@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { createToggleButton } from "../content/toggle-button";
-import type { ToggleButton } from "../content/toggle-button";
+import type { ToggleButton, ToggleButtonCallbacks } from "../content/toggle-button";
 
-// ResizeObserver is not provided by jsdom — stub it globally.
 const mockResizeObserver = {
   observe: vi.fn(),
   unobserve: vi.fn(),
@@ -19,13 +18,16 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-// Helper: returns the shadow root of the last appended host element.
 function lastShadow(): ShadowRoot {
   return (document.body.lastElementChild as HTMLElement).shadowRoot!;
 }
 
 function lastHost(): HTMLElement {
   return document.body.lastElementChild as HTMLElement;
+}
+
+function makeCallbacks(overrides: Partial<ToggleButtonCallbacks> = {}): ToggleButtonCallbacks {
+  return { onGetFeedback: vi.fn(), onTogglePause: vi.fn(), ...overrides };
 }
 
 describe("createToggleButton — DOM structure", () => {
@@ -35,7 +37,7 @@ describe("createToggleButton — DOM structure", () => {
   beforeEach(() => {
     inputEl = document.createElement("textarea");
     document.body.appendChild(inputEl);
-    result = createToggleButton(inputEl, vi.fn());
+    result = createToggleButton(inputEl, makeCallbacks());
   });
 
   afterEach(() => {
@@ -44,7 +46,6 @@ describe("createToggleButton — DOM structure", () => {
   });
 
   it("appends a host element to document.body", () => {
-    // inputEl + host = at least 2 children
     expect(document.body.contains(lastHost())).toBe(true);
   });
 
@@ -69,13 +70,34 @@ describe("createToggleButton — DOM structure", () => {
   });
 
   it("button has aria-label 'AI Literacy Coach'", () => {
-    const btn = lastShadow().querySelector("button")!;
+    const btn = lastShadow().querySelector("button.coach-toggle")!;
     expect(btn.getAttribute("aria-label")).toBe("AI Literacy Coach");
   });
 
   it("button displays the coach label text", () => {
-    const btn = lastShadow().querySelector("button")!;
-    expect(btn.textContent).toBe("C");
+    const btn = lastShadow().querySelector("button.coach-toggle")!;
+    expect(btn.textContent).toContain("C");
+  });
+
+  it("shadow root contains the mini-menu", () => {
+    expect(lastShadow().querySelector(".mini-menu")).not.toBeNull();
+  });
+
+  it("mini-menu is hidden by default", () => {
+    const menu = lastShadow().querySelector(".mini-menu")!;
+    expect(menu.classList.contains("open")).toBe(false);
+  });
+
+  it("mini-menu contains a Get prompt feedback item", () => {
+    const items = lastShadow().querySelectorAll(".menu-item");
+    const labels = Array.from(items).map((el) => el.textContent ?? "");
+    expect(labels.some((t) => t.includes("Get prompt feedback"))).toBe(true);
+  });
+
+  it("mini-menu contains a Pause on this site item", () => {
+    const items = lastShadow().querySelectorAll(".menu-item");
+    const labels = Array.from(items).map((el) => el.textContent ?? "");
+    expect(labels.some((t) => t.includes("Pause on this site"))).toBe(true);
   });
 });
 
@@ -93,20 +115,20 @@ describe("createToggleButton — positioning", () => {
     document.body.removeChild(inputEl);
   });
 
-  it("positions bottom-right corner inside the input element on creation", () => {
+  it("positions top-right corner inside the input element on creation", () => {
     vi.spyOn(inputEl, "getBoundingClientRect").mockReturnValue({
       top: 100, bottom: 300, left: 50, right: 500,
       width: 450, height: 200, x: 50, y: 100,
       toJSON: () => ({}),
     } as DOMRect);
 
-    result = createToggleButton(inputEl, vi.fn());
+    result = createToggleButton(inputEl, makeCallbacks());
     const host = lastHost();
 
-    // top  = rect.bottom − SIZE − 8 = 300 − 28 − 8 = 264
-    expect(host.style.top).toBe("264px");
-    // left = rect.right  − SIZE − 8 = 500 − 28 − 8 = 464
-    expect(host.style.left).toBe("464px");
+    // top  = rect.top + 2 = 100 + 2 = 102
+    expect(host.style.top).toBe("102px");
+    // left = rect.right − SIZE − 30 = 500 − 28 − 30 = 442
+    expect(host.style.left).toBe("442px");
   });
 
   it("updates position when the scroll event fires", () => {
@@ -122,29 +144,29 @@ describe("createToggleButton — positioning", () => {
         toJSON: () => ({}),
       } as DOMRect);
 
-    result = createToggleButton(inputEl, vi.fn());
+    result = createToggleButton(inputEl, makeCallbacks());
     window.dispatchEvent(new Event("scroll"));
 
-    // top = 400 − 28 − 8 = 364
-    expect(lastHost().style.top).toBe("364px");
+    // top = 200 + 2 = 202
+    expect(lastHost().style.top).toBe("202px");
   });
 
   it("observes the input element with ResizeObserver", () => {
-    result = createToggleButton(inputEl, vi.fn());
+    result = createToggleButton(inputEl, makeCallbacks());
     expect(mockResizeObserver.observe).toHaveBeenCalledWith(inputEl);
   });
 });
 
-describe("createToggleButton — click interaction", () => {
+describe("createToggleButton — menu interaction", () => {
   let inputEl: HTMLTextAreaElement;
   let result: ToggleButton;
-  let onClick: ReturnType<typeof vi.fn>;
+  let callbacks: ToggleButtonCallbacks;
 
   beforeEach(() => {
     inputEl = document.createElement("textarea");
     document.body.appendChild(inputEl);
-    onClick = vi.fn();
-    result = createToggleButton(inputEl, onClick);
+    callbacks = makeCallbacks();
+    result = createToggleButton(inputEl, callbacks);
   });
 
   afterEach(() => {
@@ -152,18 +174,137 @@ describe("createToggleButton — click interaction", () => {
     document.body.removeChild(inputEl);
   });
 
-  it("calls onClick when the button is clicked", () => {
-    const btn = lastShadow().querySelector("button") as HTMLButtonElement;
+  it("clicking the launcher button opens the mini-menu", () => {
+    const btn = lastShadow().querySelector("button.coach-toggle") as HTMLButtonElement;
+    const menu = lastShadow().querySelector(".mini-menu")!;
     btn.click();
-    expect(onClick).toHaveBeenCalledOnce();
+    expect(menu.classList.contains("open")).toBe(true);
   });
 
-  it("calls onClick each time the button is clicked", () => {
-    const btn = lastShadow().querySelector("button") as HTMLButtonElement;
+  it("clicking the launcher button twice closes the mini-menu", () => {
+    const btn = lastShadow().querySelector("button.coach-toggle") as HTMLButtonElement;
+    const menu = lastShadow().querySelector(".mini-menu")!;
     btn.click();
     btn.click();
-    btn.click();
-    expect(onClick).toHaveBeenCalledTimes(3);
+    expect(menu.classList.contains("open")).toBe(false);
+  });
+
+  it("clicking Get prompt feedback calls onGetFeedback and closes the menu", () => {
+    const launcher = lastShadow().querySelector("button.coach-toggle") as HTMLButtonElement;
+    const menu = lastShadow().querySelector(".mini-menu")!;
+    const feedbackItem = Array.from(lastShadow().querySelectorAll(".menu-item")).find(
+      (el) => el.textContent?.includes("Get prompt feedback")
+    ) as HTMLButtonElement;
+
+    launcher.click();
+    feedbackItem.click();
+
+    expect(callbacks.onGetFeedback).toHaveBeenCalledOnce();
+    expect(menu.classList.contains("open")).toBe(false);
+  });
+
+  it("clicking Pause on this site calls onTogglePause and closes the menu", () => {
+    const launcher = lastShadow().querySelector("button.coach-toggle") as HTMLButtonElement;
+    const menu = lastShadow().querySelector(".mini-menu")!;
+    const disableItem = Array.from(lastShadow().querySelectorAll(".menu-item")).find(
+      (el) => el.textContent?.includes("Pause on this site")
+    ) as HTMLButtonElement;
+
+    launcher.click();
+    disableItem.click();
+
+    expect(callbacks.onTogglePause).toHaveBeenCalledOnce();
+    expect(menu.classList.contains("open")).toBe(false);
+  });
+
+  it("pressing Escape closes the menu", () => {
+    const launcher = lastShadow().querySelector("button.coach-toggle") as HTMLButtonElement;
+    const menu = lastShadow().querySelector(".mini-menu")!;
+    launcher.click();
+    expect(menu.classList.contains("open")).toBe(true);
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    expect(menu.classList.contains("open")).toBe(false);
+  });
+
+  it("clicking outside closes the menu", () => {
+    const launcher = lastShadow().querySelector("button.coach-toggle") as HTMLButtonElement;
+    const menu = lastShadow().querySelector(".mini-menu")!;
+    launcher.click();
+    expect(menu.classList.contains("open")).toBe(true);
+    document.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(menu.classList.contains("open")).toBe(false);
+  });
+});
+
+describe("createToggleButton — setPaused", () => {
+  let inputEl: HTMLTextAreaElement;
+  let result: ToggleButton;
+  let btn: HTMLButtonElement;
+  let pauseItem: HTMLButtonElement;
+
+  beforeEach(() => {
+    inputEl = document.createElement("textarea");
+    document.body.appendChild(inputEl);
+    result = createToggleButton(inputEl, makeCallbacks());
+    btn = lastShadow().querySelector("button.coach-toggle") as HTMLButtonElement;
+    pauseItem = Array.from(lastShadow().querySelectorAll(".menu-item")).find(
+      (el) => el.textContent?.includes("Pause") || el.textContent?.includes("Resume")
+    ) as HTMLButtonElement;
+  });
+
+  afterEach(() => {
+    result.destroy();
+    document.body.removeChild(inputEl);
+  });
+
+  it("adds the paused class when setPaused(true) is called", () => {
+    result.setPaused(true);
+    expect(btn.classList.contains("paused")).toBe(true);
+  });
+
+  it("removes the paused class when setPaused(false) is called", () => {
+    result.setPaused(true);
+    result.setPaused(false);
+    expect(btn.classList.contains("paused")).toBe(false);
+  });
+
+  it("changes the pause menu item label to Resume coaching when paused", () => {
+    result.setPaused(true);
+    expect(pauseItem.textContent).toContain("Resume coaching");
+  });
+
+  it("restores the pause menu item label to Pause on this site when unpaused", () => {
+    result.setPaused(true);
+    result.setPaused(false);
+    expect(pauseItem.textContent).toContain("Pause on this site");
+  });
+
+  it("hides the Get prompt feedback item when paused", () => {
+    const feedbackItem = Array.from(lastShadow().querySelectorAll(".menu-item")).find(
+      (el) => el.textContent?.includes("Get prompt feedback")
+    ) as HTMLButtonElement;
+    result.setPaused(true);
+    expect(feedbackItem.hidden).toBe(true);
+  });
+
+  it("shows the Get prompt feedback item when unpaused", () => {
+    const feedbackItem = Array.from(lastShadow().querySelectorAll(".menu-item")).find(
+      (el) => el.textContent?.includes("Get prompt feedback")
+    ) as HTMLButtonElement;
+    result.setPaused(true);
+    result.setPaused(false);
+    expect(feedbackItem.hidden).toBe(false);
+  });
+
+  it("removes danger styling from pause item when paused", () => {
+    result.setPaused(true);
+    expect(pauseItem.classList.contains("menu-item--danger")).toBe(false);
+  });
+
+  it("restores danger styling on pause item when unpaused", () => {
+    result.setPaused(true);
+    result.setPaused(false);
+    expect(pauseItem.classList.contains("menu-item--danger")).toBe(true);
   });
 });
 
@@ -175,8 +316,8 @@ describe("createToggleButton — setActive", () => {
   beforeEach(() => {
     inputEl = document.createElement("textarea");
     document.body.appendChild(inputEl);
-    result = createToggleButton(inputEl, vi.fn());
-    btn = lastShadow().querySelector("button") as HTMLButtonElement;
+    result = createToggleButton(inputEl, makeCallbacks());
+    btn = lastShadow().querySelector("button.coach-toggle") as HTMLButtonElement;
   });
 
   afterEach(() => {
@@ -226,7 +367,7 @@ describe("createToggleButton — destroy", () => {
   });
 
   it("removes the host from document.body", () => {
-    const result = createToggleButton(inputEl, vi.fn());
+    const result = createToggleButton(inputEl, makeCallbacks());
     const host = lastHost();
     expect(document.body.contains(host)).toBe(true);
     result.destroy();
@@ -234,7 +375,7 @@ describe("createToggleButton — destroy", () => {
   });
 
   it("disconnects the ResizeObserver", () => {
-    const result = createToggleButton(inputEl, vi.fn());
+    const result = createToggleButton(inputEl, makeCallbacks());
     result.destroy();
     expect(mockResizeObserver.disconnect).toHaveBeenCalledOnce();
   });
@@ -246,13 +387,12 @@ describe("createToggleButton — destroy", () => {
       toJSON: () => ({}),
     } as DOMRect);
 
-    const result = createToggleButton(inputEl, vi.fn());
+    const result = createToggleButton(inputEl, makeCallbacks());
     const host = lastHost();
     const topBefore = host.style.top;
 
     result.destroy();
 
-    // Mutate the mock rect so a reposition call would produce different output
     vi.spyOn(inputEl, "getBoundingClientRect").mockReturnValue({
       top: 900, bottom: 999, left: 0, right: 999,
       width: 999, height: 99, x: 0, y: 900,
@@ -260,8 +400,19 @@ describe("createToggleButton — destroy", () => {
     } as DOMRect);
 
     window.dispatchEvent(new Event("scroll"));
-    // Position must not have changed because the listener was removed
     expect(host.style.top).toBe(topBefore);
+  });
+
+  it("stops responding to Escape key after destroy", () => {
+    const result = createToggleButton(inputEl, makeCallbacks());
+    const launcher = lastShadow().querySelector("button.coach-toggle") as HTMLButtonElement;
+    const menu = lastShadow().querySelector(".mini-menu")!;
+    launcher.click();
+    result.destroy();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    // Menu was open before destroy — after destroy the host is gone but the
+    // listener must not throw or affect remaining DOM.
+    expect(menu.classList.contains("open")).toBe(true);
   });
 });
 
@@ -273,7 +424,7 @@ describe("createToggleButton — styles", () => {
   beforeEach(() => {
     inputEl = document.createElement("textarea");
     document.body.appendChild(inputEl);
-    result = createToggleButton(inputEl, vi.fn());
+    result = createToggleButton(inputEl, makeCallbacks());
     css = lastShadow().querySelector("style")!.textContent ?? "";
   });
 
@@ -290,15 +441,19 @@ describe("createToggleButton — styles", () => {
     expect(css).toContain(".coach-toggle.active");
   });
 
-  it("base rule uses border-radius 50% for circular shape", () => {
-    expect(css).toContain("border-radius: 50%");
+  it("styles include the .mini-menu rule", () => {
+    expect(css).toContain(".mini-menu");
+  });
+
+  it("styles include the .menu-item rule", () => {
+    expect(css).toContain(".menu-item");
   });
 
   it("base rule uses pointer-events all so the button is clickable inside the none host", () => {
     expect(css).toContain("pointer-events: all");
   });
 
-  it("active rule uses a blue background to signal popup-open state", () => {
-    expect(css).toContain("#2563eb");
+  it("active rule uses a blue color to signal popup-open state", () => {
+    expect(css).toContain("#3b82f6");
   });
 });

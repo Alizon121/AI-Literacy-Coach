@@ -51,26 +51,52 @@ function attachListener(input: HTMLElement): void {
   if (attachedInputs.has(input)) return;
   attachedInputs.add(input);
 
-  const button = createToggleButton(input, async () => {
-    if (isPopupActive()) {
-      dismissPopup();
-      return;
-    }
-    const text = input.innerText || (input as HTMLInputElement).value || "";
-    if (text.length < 10) {
-      showNoChangesPopup(input);
-      return;
-    }
+  let paused = false;
+
+  async function evaluate(text: string): Promise<void> {
     lastEvaluatedPrompt = text;
     const result: EvaluationResult = await chrome.runtime.sendMessage({
       type: "EVALUATE_PROMPT",
       payload: { prompt: text },
     });
+    if (paused) return;
+    if (result?.serverOffline) {
+      console.error(
+        "[AI Literacy Coach] Cannot reach the local server. " +
+        "Make sure the backend is running: cd backend && fastapi dev main.py"
+      );
+      return;
+    }
     if (result?.rateLimitExceeded) {
       showRateLimitPopup(result.rateLimitResetInSeconds ?? 0, input);
       return;
     }
     if (result?.payload) showCoachingPopup(result.payload, input);
+  }
+
+  const button = createToggleButton(input, {
+    onGetFeedback: async () => {
+      if (isPopupActive()) {
+        dismissPopup();
+        return;
+      }
+      const text = input.innerText || (input as HTMLInputElement).value || "";
+      if (text.length < 10) {
+        showNoChangesPopup(input);
+        return;
+      }
+      await evaluate(text);
+    },
+    onTogglePause: () => {
+      paused = !paused;
+      button.setPaused(paused);
+      if (paused) {
+        dismissPopup();
+      } else {
+        const text = input.innerText || (input as HTMLInputElement).value || "";
+        if (text.length >= 10 && text !== lastEvaluatedPrompt) evaluate(text);
+      }
+    },
   });
 
   maybeStartTutorial(button.anchorEl);
@@ -87,6 +113,7 @@ function attachListener(input: HTMLElement): void {
     clearTimeout(debounceTimer);
 
     debounceTimer = setTimeout(async () => {
+      if (paused) return;
       const text = input.innerText || (input as HTMLInputElement).value || "";
       if (suppressNext) {
         suppressNext = false;
@@ -94,29 +121,7 @@ function attachListener(input: HTMLElement): void {
         return;
       }
       if (!isWorthEvaluating(text, lastEvaluatedPrompt)) return;
-      lastEvaluatedPrompt = text;
-
-      const result: EvaluationResult = await chrome.runtime.sendMessage({
-        type: "EVALUATE_PROMPT",
-        payload: { prompt: text },
-      });
-
-      if (result?.serverOffline) {
-        console.error(
-          "[AI Literacy Coach] Cannot reach the local server. " +
-          "Make sure the backend is running: cd backend && fastapi dev main.py"
-        );
-        return;
-      }
-
-      if (result?.rateLimitExceeded) {
-        showRateLimitPopup(result.rateLimitResetInSeconds ?? 0, input);
-        return;
-      }
-
-      if (!result?.payload) return;
-
-      showCoachingPopup(result.payload, input);
+      await evaluate(text);
     }, triggerDelay);
   });
 }
