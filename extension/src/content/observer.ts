@@ -109,7 +109,7 @@ function attachListener(input: HTMLElement): void {
     },
   });
 
-  input.addEventListener("input", () => {
+  const scheduleEvaluation = () => {
     clearTimeout(debounceTimer);
 
     debounceTimer = setTimeout(async () => {
@@ -123,5 +123,13 @@ function attachListener(input: HTMLElement): void {
       if (!isWorthEvaluating(text, lastEvaluatedPrompt)) return;
       await evaluate(text);
     }, triggerDelay);
+  };
+
+  input.addEventListener("input", scheduleEvaluation);
+
+  input.addEventListener("paste", () => {
+    // Let the browser finish inserting pasted content before scheduling,
+    // since paste fires before the DOM is updated.
+    setTimeout(scheduleEvaluation, 0);
   });
 }

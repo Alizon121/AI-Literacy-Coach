@@ -91,7 +91,7 @@ function attachListener(input) {
       button.destroy();
     }
   });
-  input.addEventListener("input", () => {
+  const scheduleEvaluation = () => {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(async () => {
       if (paused) return;
@@ -104,5 +104,9 @@ function attachListener(input) {
       if (!isWorthEvaluating(text, lastEvaluatedPrompt)) return;
       await evaluate(text);
     }, triggerDelay);
+  };
+  input.addEventListener("input", scheduleEvaluation);
+  input.addEventListener("paste", () => {
+    setTimeout(scheduleEvaluation, 0);
   });
 }
