@@ -8,7 +8,9 @@ const DEFAULTS: Settings = {
   suspendInIncognito: true,
   backgroundActivity: false,
   model: "phi4-mini",
+  groqModel: "llama-3.3-70b-versatile",
   serverPort: 8000,
+  apiKey: "",
   enabledSites: {
     "claude.ai": true,
     "chat.openai.com": true,

@@ -1,21 +1,7 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-import ollama
-from response_parser import parse_model_response, CoachingResponse
+// Mirrors backend/main.py BASE_SYSTEM_PROMPT + SENSITIVITY_ADDENDUM.
+// Keep both in sync when editing the prompt.
 
-app = FastAPI(title="AI Literacy Coach Backend")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Tighten to your extension ID in production
-    allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"],
-)
-
-BASE_SYSTEM_PROMPT = """You are an AI Literacy Coach — a friendly, knowledgeable assistant embedded in a \
-browser extension that helps users write better prompts when interacting with AI systems. \
-Your purpose is to educate and empower users, not to police or gatekeep. Always assume good intent.
+const BASE_SYSTEM_PROMPT = `You are an AI Literacy Coach — a friendly, knowledgeable assistant embedded in a browser extension that helps users write better prompts when interacting with AI systems. Your purpose is to educate and empower users, not to police or gatekeep. Always assume good intent.
 
 STEP 1 — CLASSIFY THE PROMPT BEFORE DOING ANYTHING ELSE
 
@@ -83,40 +69,14 @@ Rules for why_it_matters:
 - Must describe the practical consequence for the AI's response, not name the weakness.
 - Must NOT say "your prompt lacks X" or "this prompt is not specific/clear enough".
 - Example: "The AI may produce a generic answer when you need advice tailored to your situation."
-If needs_improvement is false, all other fields should be null.
-"""
+If needs_improvement is false, all other fields should be null.`;
 
+const SENSITIVITY_ADDENDUM: Record<number, string> = {
+  1: "\n\nSENSITIVITY: Only flag prompts with significant clarity or specificity issues. Ignore minor improvements.",
+  2: "\n\nSENSITIVITY: Flag prompts that would benefit from moderate improvements in clarity or specificity.",
+  3: "\n\nSENSITIVITY: Flag any prompt that could be improved, including minor suggestions.",
+};
 
-SENSITIVITY_ADDENDUM: dict[int, str] = {
-    1: "\n\nSENSITIVITY: Only flag prompts with significant clarity or specificity issues. Ignore minor improvements.",
-    2: "\n\nSENSITIVITY: Flag prompts that would benefit from moderate improvements in clarity or specificity.",
-    3: "\n\nSENSITIVITY: Flag any prompt that could be improved, including minor suggestions.",
+export function buildSystemPrompt(sensitivity: 1 | 2 | 3): string {
+  return BASE_SYSTEM_PROMPT + (SENSITIVITY_ADDENDUM[sensitivity] ?? SENSITIVITY_ADDENDUM[2]);
 }
-
-
-class PromptRequest(BaseModel):
-    prompt: str
-    model: str = "phi4-mini"
-    sensitivity: int = 2  # 1=low, 2=medium, 3=high
-
-
-@app.get("/health")
-async def health() -> dict[str, str]:
-    return {"status": "ok"}
-
-
-@app.post("/evaluate", response_model=CoachingResponse)
-async def evaluate_prompt(request: PromptRequest) -> CoachingResponse:
-    addendum = SENSITIVITY_ADDENDUM.get(request.sensitivity, SENSITIVITY_ADDENDUM[2])
-    system = BASE_SYSTEM_PROMPT + addendum
-
-    response = ollama.chat(
-        model=request.model,
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": request.prompt},
-        ],
-        options={"temperature": 0.1},
-    )
-
-    return parse_model_response(response["message"]["content"])

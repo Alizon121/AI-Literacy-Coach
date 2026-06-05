@@ -19,8 +19,10 @@ export interface Settings {
   triggerDelay: number;
   suspendInIncognito: boolean;
   backgroundActivity: boolean;
-  model: string;
+  model: string;       // local Ollama model
+  groqModel: string;   // Groq cloud model
   serverPort: number;
+  apiKey: string;      // Groq API key — if set, Groq is used; otherwise local
   enabledSites: Record<string, boolean>;
 }
 

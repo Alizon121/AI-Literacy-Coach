@@ -70,16 +70,19 @@ npm run dev       # dev mode with hot reload
 
 Claude.ai · ChatGPT · Gemini · Perplexity · Mistral · Microsoft Copilot
 
-## Notes
+## Notes for Power-Users
 
 - All prompt data stays on your device — nothing is sent to external servers.
 - The extension fails silently if the backend is offline; check the browser console for setup instructions.
 - To add Firefox support, add the `browser_specific_settings` gecko block to `manifest.json`.
 
-# AI-Literacy-Coach
-
 ## Setup (Non-power Users)
 - Install the extension from Google Chrome Web Store
-    - The extension will work out of the box and use thr groq api to handle prompt generation.
+    - The extension will work out of the box and use the groq api to handle prompt generation.
 
-- 
+- Go to console.groq.com and register for an API KEY
+    - Create an account
+    - Navigate to API Keys
+    - And create an API Key
+
+- Copy and Paste the API Key obtained from console.groq.com intothe Groq API Key field in the extension's options page

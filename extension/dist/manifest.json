@@ -41,7 +41,8 @@
     "https://gemini.google.com/*",
     "https://www.perplexity.ai/*",
     "https://chat.mistral.ai/*",
-    "https://copilot.microsoft.com/*"
+    "https://copilot.microsoft.com/*",
+    "https://api.groq.com/*"
   ],
   "options_page": "options.html",
   "web_accessible_resources": [
@@ -71,6 +72,6 @@
     }
   ],
   "content_security_policy": {
-    "extension_pages": "script-src 'self' http://localhost:5173; object-src 'self'; connect-src 'self' http://localhost:8000 http://localhost:5173 http://localhost:8000/evaluate ws://localhost:5173"
+    "extension_pages": "script-src 'self' http://localhost:5173; object-src 'self'; connect-src 'self' http://localhost:8000 http://localhost:5173 http://localhost:8000/evaluate ws://localhost:5173 https://api.groq.com"
   }
 }
