@@ -14,6 +14,9 @@
   },
   "content_scripts": [
     {
+      "js": [
+        "assets/index.ts-D4VVwDYf.js"
+      ],
       "matches": [
         "https://claude.ai/*",
         "https://chat.openai.com/*",
@@ -22,9 +25,6 @@
         "https://www.perplexity.ai/*",
         "https://chat.mistral.ai/*",
         "https://copilot.microsoft.com/*"
-      ],
-      "js": [
-        "src/content/index.ts-loader.js"
       ],
       "run_at": "document_idle"
     }
@@ -47,26 +47,18 @@
   "options_page": "options.html",
   "web_accessible_resources": [
     {
-      "resources": [
-        "public/icons/*"
-      ],
       "matches": [
-        "https://claude.ai/*",
+        "https://chat.mistral.ai/*",
         "https://chat.openai.com/*",
         "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://copilot.microsoft.com/*",
         "https://gemini.google.com/*",
-        "https://www.perplexity.ai/*",
-        "https://chat.mistral.ai/*",
-        "https://copilot.microsoft.com/*"
-      ]
-    },
-    {
-      "matches": [
-        "<all_urls>"
+        "https://www.perplexity.ai/*"
       ],
       "resources": [
-        "**/*",
-        "*"
+        "public/icons/*",
+        "assets/index.ts-D4VVwDYf.js"
       ],
       "use_dynamic_url": false
     }
