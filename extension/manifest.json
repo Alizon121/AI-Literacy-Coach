@@ -1,0 +1,67 @@
+{
+  "manifest_version": 3,
+  "name": "AI Literacy Coach",
+  "short_name": "AI Coach",
+  "version": "1.0.0",
+  "description": "Helps you write clearer, more effective prompts when interacting with AI platforms.",
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AI Literacy Coach"
+  },
+
+  "background": {
+    "service_worker": "src/background/service-worker.ts",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://claude.ai/*",
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "https://gemini.google.com/*",
+        "https://www.perplexity.ai/*",
+        "https://chat.mistral.ai/*",
+        "https://copilot.microsoft.com/*"
+      ],
+      "js": ["src/content/index.ts"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "permissions": ["storage", "activeTab", "scripting"],
+
+  "host_permissions": [
+    "https://claude.ai/*",
+    "https://chat.openai.com/*",
+    "https://chatgpt.com/*",
+    "https://gemini.google.com/*",
+    "https://www.perplexity.ai/*",
+    "https://chat.mistral.ai/*",
+    "https://copilot.microsoft.com/*",
+    "https://api.groq.com/*"
+  ],
+
+  "options_page": "options.html",
+
+  "web_accessible_resources": [
+    {
+      "resources": ["public/icons/*"],
+      "matches": [
+        "https://claude.ai/*",
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "https://gemini.google.com/*",
+        "https://www.perplexity.ai/*",
+        "https://chat.mistral.ai/*",
+        "https://copilot.microsoft.com/*"
+      ]
+    }
+  ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' http://localhost:5173; object-src 'self'; connect-src 'self' http://localhost:8000 http://localhost:5173 http://localhost:8000/evaluate ws://localhost:5173 https://api.groq.com"
+  }
+}
