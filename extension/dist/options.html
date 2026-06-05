@@ -1,10 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>CRXJS DEV MODE</title>
-    <script src="/assets/loading-page-ece59439.js" type="module"></script>
-  </head>
-  <body>
-    <p>An unknown error occurred. Failed to load the script.</p>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Literacy Coach — Settings</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      color: #111;
+      background: #f9f9f9;
+      padding: 40px 24px;
+    }
+
+    .container { max-width: 560px; margin: 0 auto; }
+
+    header { margin-bottom: 32px; }
+    header h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+    header p { color: #666; font-size: 13px; }
+
+    section {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+
+    section h2 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #555;
+      margin-bottom: 16px;
+    }
+
+    .field { margin-bottom: 16px; }
+    .field:last-child { margin-bottom: 0; }
+
+    label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 13px; }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #d1d1d1;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      background: #fff;
+      color: #111;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.15); }
+
+    .radio-group { display: flex; gap: 16px; margin-bottom: 16px; }
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 400;
+      cursor: pointer;
+      margin-bottom: 0;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .toggle-row label { margin-bottom: 0; }
+
+    .toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #d1d1d1;
+      border-radius: 99px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      left: 3px;
+      top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .toggle input:checked + .slider { background: #3b82f6; }
+    .toggle input:checked + .slider::before { transform: translateX(16px); }
+
+    .range-row { display: flex; align-items: center; gap: 12px; }
+    input[type="range"] { flex: 1; accent-color: #3b82f6; }
+    .range-label { font-size: 12px; color: #555; width: 52px; text-align: right; flex-shrink: 0; }
+
+    .hint { font-size: 12px; color: #888; margin-top: 4px; }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    button#save {
+      padding: 9px 20px;
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    button#save:hover { background: #2563eb; }
+
+    #status { font-size: 13px; color: #16a34a; }
+  </style>
+  <script type="module" crossorigin src="/assets/options.html-CAVCH4uC.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/storage-Dq7FLaD8.js">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>AI Literacy Coach</h1>
+      <p>Configure your coaching preferences</p>
+    </header>
+
+    <!-- AI Backend -->
+    <section>
+      <h2>AI Backend</h2>
+
+      <div class="radio-group">
+        <label><input type="radio" name="backend" id="backend-local" value="local"> Local (Ollama)</label>
+        <label><input type="radio" name="backend" id="backend-groq" value="groq"> Groq (Cloud)</label>
+      </div>
+
+      <div id="groq-config">
+        <div class="field">
+          <label for="apiKey">Groq API Key</label>
+          <input type="password" id="apiKey" placeholder="gsk_…" autocomplete="off" />
+          <p class="hint">Get a free key at console.groq.com by registering and creating a new API KEY</p>
+        </div>
+        <div class="field">
+          <label for="groqModel">Model</label>
+          <select id="groqModel">
+            <option value="llama-3.3-70b-versatile">Llama 3.3 70B — best quality (recommended)</option>
+            <option value="llama3-8b-8192">Llama 3 8B — faster, lightweight</option>
+            <option value="gemma2-9b-it">Gemma 2 9B</option>
+            <option value="custom">Custom model…</option>
+          </select>
+        </div>
+        <div class="field" id="groq-custom-model-field" hidden>
+          <label for="groqModelCustom">Custom model ID</label>
+          <input type="text" id="groqModelCustom" placeholder="e.g. mixtral-8x7b-32768" />
+          <p class="hint">Enter the exact model ID shown in the Groq console.</p>
+        </div>
+      </div>
+
+      <div id="local-config">
+        <div class="field">
+          <label for="model">Ollama Model</label>
+          <input type="text" id="model" placeholder="phi4-mini" />
+        </div>
+        <div class="field">
+          <label for="serverPort">Server Port</label>
+          <input type="number" id="serverPort" min="1" max="65535" placeholder="8000" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Coaching -->
+    <section>
+      <h2>Coaching</h2>
+
+      <div class="field">
+        <div class="toggle-row">
+          <label for="coachingEnabled">Enable coaching</label>
+          <label class="toggle">
+            <input type="checkbox" id="coachingEnabled" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="sensitivity">Sensitivity</label>
+        <select id="sensitivity">
+          <option value="1">Low — only flag major issues</option>
+          <option value="2">Medium — moderate improvements (default)</option>
+          <option value="3">High — flag anything improvable</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Feedback delay</label>
+        <div class="range-row">
+          <input type="range" id="triggerDelay" min="500" max="5000" step="250" />
+          <span class="range-label" id="delay-label">1500ms</span>
+        </div>
+        <p class="hint">How long after you stop typing before the coach evaluates.</p>
+      </div>
+    </section>
+
+    <div class="footer">
+      <button id="save" type="button">Save settings</button>
+      <span id="status"></span>
+    </div>
+  </div>
+
+</body>
 </html>
