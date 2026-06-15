@@ -31,7 +31,7 @@
     }
   ],
 
-  "permissions": ["storage", "activeTab", "scripting"],
+  "permissions": ["storage"],
 
   "host_permissions": [
     "https://claude.ai/*",
