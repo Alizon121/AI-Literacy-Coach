@@ -45,6 +45,47 @@ export function mountNoChangesMessage(
   };
 }
 
+function OfflineMessage({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <div className="popup">
+      <div className="popup-header">
+        <div className="popup-header-left">
+          <span>AI Literacy Coach</span>
+          <span className="badge badge-warn">setup needed</span>
+        </div>
+        <button className="icon-btn" aria-label="Close" onClick={onDismiss}>✕</button>
+      </div>
+      <div className="popup-body">
+        <p>No AI backend is configured. Open Settings to add a free Groq API key or connect a local Ollama model.</p>
+        <button
+          className="action-btn"
+          style={{ marginTop: "10px" }}
+          onClick={() => chrome.runtime.sendMessage({ type: "OPEN_OPTIONS" })}
+        >
+          Open Settings
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function mountOfflineMessage(
+  shadow: ShadowRoot,
+  onDismiss: () => void
+): () => void {
+  const container = document.createElement("div");
+  container.style.pointerEvents = "all";
+  shadow.appendChild(container);
+
+  const root = createRoot(container);
+  root.render(<OfflineMessage onDismiss={onDismiss} />);
+
+  return () => {
+    root.unmount();
+    container.remove();
+  };
+}
+
 function RateLimitMessage({ resetInSeconds, onDismiss }: { resetInSeconds: number; onDismiss: () => void }) {
   return (
     <div className="popup">
