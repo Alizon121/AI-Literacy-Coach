@@ -15,9 +15,28 @@ const STEPS = [
     title: "One thing to know",
     body: "Suggestions are AI-generated and may vary between evaluations of the same prompt. Nothing changes unless you click Apply — you're always in control.",
   },
+  {
+    title: "READ THIS TO SETUP YOUR AI COACH",
+    body: "The coach needs an AI model to evaluate your prompts. Add a free Groq API key in Settings to get started, or connect a local Ollama model if you prefer to keep everything on your device.",
+  },
 ];
 
 const DISCLAIMER_STEP = STEPS.length - 1;
+
+let tutorialActive = false;
+let activeTutorialAnchor: HTMLElement | null = null;
+let activeTutorialResizeObserver: ResizeObserver | null = null;
+let activeTutorialReposition: (() => void) | null = null;
+
+export function updateTutorialAnchor(newAnchorHost: HTMLElement): void {
+  if (!tutorialActive) return;
+  if (activeTutorialResizeObserver && activeTutorialAnchor) {
+    activeTutorialResizeObserver.unobserve(activeTutorialAnchor);
+    activeTutorialResizeObserver.observe(newAnchorHost);
+  }
+  activeTutorialAnchor = newAnchorHost;
+  activeTutorialReposition?.();
+}
 
 function isTutorialComplete(): Promise<boolean> {
   return new Promise((resolve) => {
@@ -32,12 +51,15 @@ function markTutorialComplete(): void {
 }
 
 export async function maybeStartTutorial(anchorHost: HTMLElement): Promise<void> {
+  if (tutorialActive) return;
   const complete = await isTutorialComplete();
   if (complete) return;
+  tutorialActive = true;
   startTutorial(anchorHost);
 }
 
 function startTutorial(anchorHost: HTMLElement): void {
+  activeTutorialAnchor = anchorHost;
   let currentStep = 0;
 
   const host = document.createElement("div");
@@ -66,7 +88,9 @@ function startTutorial(anchorHost: HTMLElement): void {
   document.body.appendChild(host);
 
   function reposition(): void {
-    const rect = anchorHost.getBoundingClientRect();
+    if (!activeTutorialAnchor) return;
+    const rect = activeTutorialAnchor.getBoundingClientRect();
+    if (rect.top <= 0 || rect.top >= window.innerHeight) return;
     const cardWidth = 280;
     const anchorCenterX = rect.left + rect.width / 2;
 
@@ -77,10 +101,11 @@ function startTutorial(anchorHost: HTMLElement): void {
     host.style.bottom = `${distFromBottom + 10}px`;
     host.style.left = `${clampedLeft}px`;
 
-    // Point arrow at toggle button center regardless of card clamping
     const arrowLeft = anchorCenterX - clampedLeft;
     arrow.style.left = `${arrowLeft}px`;
   }
+
+  activeTutorialReposition = reposition;
 
   function render(): void {
     const step = STEPS[currentStep];
@@ -137,7 +162,22 @@ function startTutorial(anchorHost: HTMLElement): void {
     });
 
     footer.appendChild(dots);
-    footer.appendChild(nextBtn);
+
+    if (isLast) {
+      const btnGroup = document.createElement("div");
+      btnGroup.className = "btn-group";
+
+      const settingsBtn = document.createElement("button");
+      settingsBtn.className = "settings-btn";
+      settingsBtn.textContent = "Open Settings";
+      settingsBtn.addEventListener("click", () => chrome.runtime.sendMessage({ type: "OPEN_OPTIONS" }));
+
+      btnGroup.appendChild(settingsBtn);
+      btnGroup.appendChild(nextBtn);
+      footer.appendChild(btnGroup);
+    } else {
+      footer.appendChild(nextBtn);
+    }
 
     card.appendChild(header);
     card.appendChild(body);
@@ -146,6 +186,9 @@ function startTutorial(anchorHost: HTMLElement): void {
 
   function dismiss(): void {
     markTutorialComplete();
+    activeTutorialAnchor = null;
+    activeTutorialResizeObserver = null;
+    activeTutorialReposition = null;
     resizeObserver.disconnect();
     window.removeEventListener("scroll", reposition);
     window.removeEventListener("resize", reposition);
@@ -153,6 +196,7 @@ function startTutorial(anchorHost: HTMLElement): void {
   }
 
   const resizeObserver = new ResizeObserver(reposition);
+  activeTutorialResizeObserver = resizeObserver;
   resizeObserver.observe(anchorHost);
   window.addEventListener("scroll", reposition, { passive: true });
   window.addEventListener("resize", reposition, { passive: true });
@@ -234,6 +278,19 @@ function styles(): string {
     .next-btn:hover { background: #2563eb; }
     .next-btn-final { background: #16a34a; }
     .next-btn-final:hover { background: #15803d; }
+    .btn-group { display: flex; gap: 8px; align-items: center; }
+    .settings-btn {
+      background: transparent;
+      color: #94a3b8;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .settings-btn:hover { border-color: #94a3b8; color: #f1f5f9; }
     .arrow {
       position: fixed;
       width: 0;

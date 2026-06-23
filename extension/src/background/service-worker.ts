@@ -19,6 +19,10 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       chrome.runtime.sendMessage({ type: "STATS_UPDATED" }).catch(() => {});
       break;
 
+    case "OPEN_OPTIONS":
+      chrome.runtime.openOptionsPage();
+      break;
+
     case "SUGGESTION_DISMISSED":
       break;
   }

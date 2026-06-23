@@ -26,14 +26,18 @@ function call(msg: any): Promise<any> {
   });
 }
 
+// chrome.storage.sync.get is typed as returning void in @types/chrome, so we
+// cast to vi.fn() to allow mockResolvedValue to accept arbitrary return values.
+const storageGet = () => chrome.storage.sync.get as ReturnType<typeof vi.fn>;
+
 function mockStorage(settings: Record<string, unknown> = {}) {
-  vi.mocked(chrome.storage.sync.get).mockResolvedValue({ settings });
+  storageGet().mockResolvedValue({ settings });
 }
 
 beforeEach(() => {
   // Default: empty storage → all DEFAULTS (apiKey = "", coachingEnabled = true)
-  vi.mocked(chrome.storage.sync.get).mockResolvedValue({});
-  vi.mocked(chrome.runtime.sendMessage).mockResolvedValue({});
+  storageGet().mockResolvedValue({});
+  (chrome.runtime.sendMessage as ReturnType<typeof vi.fn>).mockResolvedValue({});
   fetchMock.mockReset();
 });
 

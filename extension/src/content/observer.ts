@@ -1,8 +1,8 @@
 import { findActiveInput } from "../utils/inputDetector";
 import { isWorthEvaluating } from "../utils/preFilter";
-import { showCoachingPopup, showRateLimitPopup, showNoChangesPopup, dismissPopup, isPopupActive, onPopupStateChange } from "./popup-manager";
+import { showCoachingPopup, showRateLimitPopup, showNoChangesPopup, showOfflinePopup, dismissPopup, isPopupActive, onPopupStateChange } from "./popup-manager";
 import { createToggleButton } from "./toggle-button";
-import { maybeStartTutorial } from "./tutorial-manager";
+import { maybeStartTutorial, updateTutorialAnchor } from "./tutorial-manager";
 import type { EvaluationResult } from "../types";
 
 let debounceTimer: ReturnType<typeof setTimeout>;
@@ -10,6 +10,7 @@ let lastEvaluatedPrompt = "";
 let triggerDelay = 1500;
 let mutationObserver: MutationObserver | null = null;
 let suppressNext = false;
+let hasShownOfflineWarning = false;
 
 const activeButtons: Array<{ destroy: () => void }> = [];
 
@@ -61,10 +62,10 @@ function attachListener(input: HTMLElement): void {
     });
     if (paused) return;
     if (result?.serverOffline) {
-      console.error(
-        "[AI Literacy Coach] Cannot reach the local server. " +
-        "Make sure the backend is running: cd backend && fastapi dev main.py"
-      );
+      if (!hasShownOfflineWarning) {
+        hasShownOfflineWarning = true;
+        showOfflinePopup(input);
+      }
       return;
     }
     if (result?.rateLimitExceeded) {
@@ -100,6 +101,7 @@ function attachListener(input: HTMLElement): void {
   });
 
   maybeStartTutorial(button.anchorEl);
+  updateTutorialAnchor(button.anchorEl);
 
   const unsubscribe = onPopupStateChange((active) => button.setActive(active));
   activeButtons.push({

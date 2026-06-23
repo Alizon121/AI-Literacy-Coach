@@ -5,19 +5,8 @@ import type { Settings } from "../types";
 async function init(): Promise<void> {
   const response = await chrome.runtime.sendMessage({ type: "INIT_TAB" });
   const settings: Settings = response.settings;
-  const serverOnline: boolean = response.serverOnline;
 
-  if (!serverOnline) {
-    console.error(
-      "[AI Literacy Coach] Backend server is not reachable at localhost:8000.\n" +
-      "Setup instructions:\n" +
-      "  1. Install the ollama Python package:  pip install ollama\n" +
-      "  2. Pull the model:                     ollama pull llama3\n" +
-      "  3. Start the backend:                  cd backend && fastapi dev main.py"
-    );
-  }
-
-  if (settings.coachingEnabled && serverOnline) {
+  if (settings.coachingEnabled) {
     watchForInputFields(() => {});
   }
 }

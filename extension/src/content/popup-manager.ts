@@ -1,5 +1,5 @@
 import { createShadowHost } from "./shadow-host";
-import { mountPopup, mountRateLimitMessage, mountNoChangesMessage } from "./popup-renderer";
+import { mountPopup, mountRateLimitMessage, mountNoChangesMessage, mountOfflineMessage } from "./popup-renderer";
 import type { CoachingResponse } from "../types";
 
 interface PopupInstance {
@@ -65,6 +65,27 @@ export function showNoChangesPopup(inputEl: HTMLElement): void {
   };
 
   autoDismissTimer = setTimeout(dismissPopup, 4000);
+
+  document.addEventListener("click", handleOutsideClick);
+  document.addEventListener("keydown", handleEscapeKey);
+  notifyStateChange();
+}
+
+export function showOfflinePopup(inputEl: HTMLElement): void {
+  dismissPopup();
+
+  const { host, shadow, stopTracking } = createShadowHost(inputEl);
+  const unmount = mountOfflineMessage(shadow, dismissPopup);
+
+  activePopup = {
+    host,
+    cleanup: () => {
+      unmount();
+      stopTracking();
+    },
+  };
+
+  autoDismissTimer = setTimeout(dismissPopup, 8000);
 
   document.addEventListener("click", handleOutsideClick);
   document.addEventListener("keydown", handleEscapeKey);
