@@ -3,7 +3,7 @@
   "name": "AI Literacy Coach",
   "short_name": "AI Coach",
   "version": "1.0.0",
-  "description": "Helps you write clearer, more effective prompts when interacting with AI platforms.",
+  "description": "Real-time AI prompt coaching for ChatGPT, Claude, Gemini, and more. Evaluates clarity and specificity, then suggests improvements.",
 
   "action": {
     "default_popup": "popup.html",
