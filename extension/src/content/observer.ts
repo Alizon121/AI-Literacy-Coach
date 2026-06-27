@@ -117,6 +117,14 @@ function attachListener(input: HTMLElement): void {
     debounceTimer = setTimeout(async () => {
       if (paused) return;
       const text = input.innerText || (input as HTMLInputElement).value || "";
+
+      // Input was cleared by the site after submission — dismiss any open popup.
+      if (text.length === 0) {
+        dismissPopup();
+        lastEvaluatedPrompt = "";
+        return;
+      }
+
       if (suppressNext) {
         suppressNext = false;
         lastEvaluatedPrompt = text;
@@ -126,6 +134,14 @@ function attachListener(input: HTMLElement): void {
       await evaluate(text);
     }, triggerDelay);
   };
+
+  // Dismiss immediately when the user submits with Enter (no Shift = newline).
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      clearTimeout(debounceTimer);
+      dismissPopup();
+    }
+  });
 
   input.addEventListener("input", scheduleEvaluation);
 

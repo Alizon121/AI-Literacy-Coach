@@ -100,11 +100,25 @@ export function createToggleButton(
 
   const reposition = () => {
     const rect = inputEl.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) {
+      host.style.visibility = "hidden";
+      return;
+    }
+    host.style.visibility = "visible";
     host.style.top = `${rect.top + 2}px`;
     host.style.left = `${rect.right - SIZE - 30}px`;
   };
 
   reposition();
+
+  // Reposition after SPA navigations (e.g. ChatGPT pushState from /?oai-dm=1 → /c/[id])
+  // which reflow the layout without changing the element's size.
+  const originalPushState = history.pushState.bind(history);
+  history.pushState = (...args) => {
+    originalPushState(...args);
+    setTimeout(reposition, 300);
+  };
+  window.addEventListener("popstate", () => setTimeout(reposition, 300));
 
   const resizeObserver = new ResizeObserver(reposition);
   resizeObserver.observe(inputEl);
@@ -124,6 +138,7 @@ export function createToggleButton(
       disableBtn.classList.toggle("menu-item--danger", !paused);
     },
     destroy: () => {
+      history.pushState = originalPushState;
       resizeObserver.disconnect();
       window.removeEventListener("scroll", reposition);
       window.removeEventListener("resize", reposition);
