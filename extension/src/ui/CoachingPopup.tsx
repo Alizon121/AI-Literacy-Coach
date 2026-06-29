@@ -9,6 +9,7 @@ interface Props {
   onDismiss: () => void;
 }
 
+
 export function CoachingPopup({ suggestion, onApply, onDismiss }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("observation");
@@ -61,20 +62,24 @@ export function CoachingPopup({ suggestion, onApply, onDismiss }: Props) {
       </div>
 
       <div className="tab-row">
-        {(["observation", "why_it_matters", "suggestion"] as Tab[]).map((tab) => (
-          <button
-            key={tab}
-            className={`tab${activeTab === tab ? " active" : ""}`}
-            onClick={(e) => { e.stopPropagation(); setActiveTab(tab); }}
-          >
-            {tabLabels[tab]}
-          </button>
-        ))}
+        {(["observation", "why_it_matters", "suggestion"] as Tab[])
+          .filter((tab) => !!tabContent[tab])
+          .map((tab) => (
+            <button
+              key={tab}
+              className={`tab${activeTab === tab ? " active" : ""}`}
+              onClick={(e) => { e.stopPropagation(); setActiveTab(tab); }}
+            >
+              {tabLabels[tab]}
+            </button>
+          ))}
       </div>
 
       <div className="popup-body">
         {activeTab === "suggestion" ? (
-          <div className="suggested-prompt">{tabContent.suggestion}</div>
+          <div className="suggested-prompt">
+            {tabContent.suggestion ?? "Unable to provide a suggestion for this prompt."}
+          </div>
         ) : (
           <p>{tabContent[activeTab]}</p>
         )}

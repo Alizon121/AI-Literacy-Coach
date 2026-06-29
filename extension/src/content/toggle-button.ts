@@ -120,7 +120,15 @@ export function createToggleButton(
   };
   window.addEventListener("popstate", () => setTimeout(reposition, 300));
 
-  const resizeObserver = new ResizeObserver(reposition);
+  // Debounce size-change repositions so layout reflows (e.g. Mistral clearing
+  // the input after submission) settle before we read the final rect.
+  let resizeTimer: ReturnType<typeof setTimeout>;
+  const repositionAfterResize = () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(reposition, 150);
+  };
+
+  const resizeObserver = new ResizeObserver(repositionAfterResize);
   resizeObserver.observe(inputEl);
   window.addEventListener("scroll", reposition, { passive: true });
   window.addEventListener("resize", reposition, { passive: true });

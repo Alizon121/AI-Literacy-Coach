@@ -6,7 +6,7 @@ export interface ShadowHostResult {
   stopTracking: () => void;
 }
 
-export function createShadowHost(inputEl: HTMLElement): ShadowHostResult {
+export function createShadowHost(inputEl: HTMLElement, onInputGone?: () => void): ShadowHostResult {
   const host = document.createElement("div");
 
   const rect = inputEl.getBoundingClientRect();
@@ -27,14 +27,21 @@ export function createShadowHost(inputEl: HTMLElement): ShadowHostResult {
 
   document.body.appendChild(host);
 
-  const stopTracking = trackPosition(host, inputEl);
+  const stopTracking = trackPosition(host, inputEl, onInputGone);
 
   return { host, shadow, stopTracking };
 }
 
-function trackPosition(host: HTMLElement, inputEl: HTMLElement): () => void {
+function trackPosition(host: HTMLElement, inputEl: HTMLElement, onInputGone?: () => void): () => void {
   const reposition = () => {
     const rect = inputEl.getBoundingClientRect();
+
+    // Input was removed from DOM or hidden — dismiss the popup rather than repositioning.
+    if (!inputEl.isConnected || (rect.width === 0 && rect.height === 0)) {
+      onInputGone?.();
+      return;
+    }
+
     const spaceBelow = window.innerHeight - rect.bottom;
     // Use the actual rendered height of the host; fall back to an estimate
     // before React has painted the first frame (offsetHeight === 0).
