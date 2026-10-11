@@ -96,12 +96,19 @@ async function evaluateWithGroq(prompt: string, settings: Settings): Promise<Eva
       const resetInSeconds = retryAfter ? parseInt(retryAfter, 10) : secondsUntilMidnightUTC();
       return { payload: null, rateLimitExceeded: true, rateLimitResetInSeconds: resetInSeconds };
     }
-    if (!res.ok) return { payload: null };
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.error(`[AI Literacy Coach] Groq request failed (${res.status}) for model "${settings.groqModel}": ${body.slice(0, 300)}`);
+      return { payload: null };
+    }
 
     const data = await res.json();
     const content: string = data.choices?.[0]?.message?.content ?? "";
     const coaching = parseCoachingResponse(content);
-    if (!coaching) return { payload: null };
+    if (!coaching) {
+      console.error("[AI Literacy Coach] Could not parse Groq response:", content.slice(0, 300));
+      return { payload: null };
+    }
 
     await recordEvaluation();
     if (coaching.needs_improvement) await recordSuggestionMade();

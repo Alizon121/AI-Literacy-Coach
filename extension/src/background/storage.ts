@@ -1,5 +1,15 @@
 import type { Settings, Stats } from "../types";
 
+export const DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b";
+
+// Groq models that have been shut down; saved settings pointing at these are migrated to the default.
+const RETIRED_GROQ_MODELS = new Set([
+  "llama-3.3-70b-versatile",
+  "llama-3.1-8b-instant",
+  "llama3-8b-8192",
+  "gemma2-9b-it",
+]);
+
 const DEFAULTS: Settings = {
   coachingEnabled: true,
   toolbarVisible: true,
@@ -8,7 +18,7 @@ const DEFAULTS: Settings = {
   suspendInIncognito: true,
   backgroundActivity: false,
   model: "phi4-mini",
-  groqModel: "llama-3.3-70b-versatile",
+  groqModel: DEFAULT_GROQ_MODEL,
   serverPort: 8000,
   apiKey: "",
   enabledSites: {
@@ -23,7 +33,9 @@ const DEFAULTS: Settings = {
 
 export async function getSettings(): Promise<Settings> {
   const stored = await chrome.storage.sync.get("settings");
-  return { ...DEFAULTS, ...stored.settings };
+  const settings: Settings = { ...DEFAULTS, ...stored.settings };
+  if (RETIRED_GROQ_MODELS.has(settings.groqModel)) settings.groqModel = DEFAULT_GROQ_MODEL;
+  return settings;
 }
 
 export async function saveSettings(partial: Partial<Settings>): Promise<void> {

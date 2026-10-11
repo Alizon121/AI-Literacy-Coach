@@ -201,15 +201,14 @@
         <div class="field">
           <label for="groqModel">Model</label>
           <select id="groqModel">
-            <option value="llama-3.3-70b-versatile">Llama 3.3 70B — best quality (recommended)</option>
-            <option value="llama3-8b-8192">Llama 3 8B — faster, lightweight</option>
-            <option value="gemma2-9b-it">Gemma 2 9B</option>
+            <option value="openai/gpt-oss-120b">GPT-OSS 120B — best quality (recommended)</option>
+            <option value="openai/gpt-oss-20b">GPT-OSS 20B — faster, lightweight</option>
             <option value="custom">Custom model…</option>
           </select>
         </div>
         <div class="field" id="groq-custom-model-field" hidden>
           <label for="groqModelCustom">Custom model ID</label>
-          <input type="text" id="groqModelCustom" placeholder="e.g. mixtral-8x7b-32768" />
+          <input type="text" id="groqModelCustom" placeholder="e.g. qwen/qwen3.8-27b" />
           <p class="hint">Enter the exact model ID shown in the Groq console.</p>
         </div>
 

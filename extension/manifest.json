@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "AI Literacy Coach",
   "short_name": "AI Coach",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Real-time AI prompt coaching for ChatGPT, Claude, Gemini, and more. Evaluates clarity and specificity, then suggests improvements.",
 
   "action": {

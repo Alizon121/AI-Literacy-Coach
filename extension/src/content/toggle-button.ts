@@ -11,6 +11,7 @@ export interface ToggleButtonCallbacks {
 }
 
 const SIZE = 28;
+const MENU_GAP = 6;
 
 export function createToggleButton(
   inputEl: HTMLElement,
@@ -67,6 +68,15 @@ export function createToggleButton(
     menuOpen = true;
     menu.classList.add("open");
     menu.setAttribute("aria-hidden", "false");
+
+    // Flip above the button when the menu would overflow the viewport bottom,
+    // unless there's even less room above.
+    menu.classList.remove("above");
+    const buttonRect = button.getBoundingClientRect();
+    const menuHeight = menu.offsetHeight + MENU_GAP;
+    const spaceBelow = window.innerHeight - buttonRect.bottom;
+    const spaceAbove = buttonRect.top;
+    menu.classList.toggle("above", spaceBelow < menuHeight && spaceAbove > spaceBelow);
   };
 
   const closeMenu = () => {
@@ -220,7 +230,7 @@ function styles(): string {
       display: none;
       flex-direction: column;
       position: absolute;
-      top: calc(100% + 6px);
+      top: calc(100% + ${MENU_GAP}px);
       right: 0;
       background: #1f2937;
       border-radius: 10px;
@@ -232,6 +242,10 @@ function styles(): string {
     }
     .mini-menu.open {
       display: flex;
+    }
+    .mini-menu.above {
+      top: auto;
+      bottom: calc(100% + ${MENU_GAP}px);
     }
     .menu-item {
       display: flex;
