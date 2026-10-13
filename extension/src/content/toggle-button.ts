@@ -11,6 +11,7 @@ export interface ToggleButtonCallbacks {
 }
 
 const SIZE = 28;
+const MENU_GAP = 6;
 
 export function createToggleButton(
   inputEl: HTMLElement,
@@ -67,6 +68,15 @@ export function createToggleButton(
     menuOpen = true;
     menu.classList.add("open");
     menu.setAttribute("aria-hidden", "false");
+
+    // Flip above the button when the menu would overflow the viewport bottom,
+    // unless there's even less room above.
+    menu.classList.remove("above");
+    const buttonRect = button.getBoundingClientRect();
+    const menuHeight = menu.offsetHeight + MENU_GAP;
+    const spaceBelow = window.innerHeight - buttonRect.bottom;
+    const spaceAbove = buttonRect.top;
+    menu.classList.toggle("above", spaceBelow < menuHeight && spaceAbove > spaceBelow);
   };
 
   const closeMenu = () => {
@@ -100,13 +110,35 @@ export function createToggleButton(
 
   const reposition = () => {
     const rect = inputEl.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) {
+      host.style.visibility = "hidden";
+      return;
+    }
+    host.style.visibility = "visible";
     host.style.top = `${rect.top + 2}px`;
     host.style.left = `${rect.right - SIZE - 30}px`;
   };
 
   reposition();
 
-  const resizeObserver = new ResizeObserver(reposition);
+  // Reposition after SPA navigations (e.g. ChatGPT pushState from /?oai-dm=1 → /c/[id])
+  // which reflow the layout without changing the element's size.
+  const originalPushState = history.pushState.bind(history);
+  history.pushState = (...args) => {
+    originalPushState(...args);
+    setTimeout(reposition, 300);
+  };
+  window.addEventListener("popstate", () => setTimeout(reposition, 300));
+
+  // Debounce size-change repositions so layout reflows (e.g. Mistral clearing
+  // the input after submission) settle before we read the final rect.
+  let resizeTimer: ReturnType<typeof setTimeout>;
+  const repositionAfterResize = () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(reposition, 150);
+  };
+
+  const resizeObserver = new ResizeObserver(repositionAfterResize);
   resizeObserver.observe(inputEl);
   window.addEventListener("scroll", reposition, { passive: true });
   window.addEventListener("resize", reposition, { passive: true });
@@ -124,6 +156,7 @@ export function createToggleButton(
       disableBtn.classList.toggle("menu-item--danger", !paused);
     },
     destroy: () => {
+      history.pushState = originalPushState;
       resizeObserver.disconnect();
       window.removeEventListener("scroll", reposition);
       window.removeEventListener("resize", reposition);
@@ -197,7 +230,7 @@ function styles(): string {
       display: none;
       flex-direction: column;
       position: absolute;
-      top: calc(100% + 6px);
+      top: calc(100% + ${MENU_GAP}px);
       right: 0;
       background: #1f2937;
       border-radius: 10px;
@@ -209,6 +242,10 @@ function styles(): string {
     }
     .mini-menu.open {
       display: flex;
+    }
+    .mini-menu.above {
+      top: auto;
+      bottom: calc(100% + ${MENU_GAP}px);
     }
     .menu-item {
       display: flex;

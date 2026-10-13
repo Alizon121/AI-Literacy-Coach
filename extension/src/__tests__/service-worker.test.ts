@@ -91,7 +91,7 @@ describe("EVALUATE_PROMPT — backend routing", () => {
   const PROMPT = "Tell me about the history of machine learning in detail";
 
   it("calls the Groq endpoint when an apiKey is stored", async () => {
-    mockStorage({ apiKey: "gsk_test", groqModel: "llama-3.3-70b-versatile" });
+    mockStorage({ apiKey: "gsk_test", groqModel: "openai/gpt-oss-120b" });
     fetchMock.mockResolvedValue({
       ok: true,
       status: 200,
@@ -144,7 +144,7 @@ describe("EVALUATE_PROMPT — backend routing", () => {
   });
 
   it("sends the correct model in the Groq request body", async () => {
-    mockStorage({ apiKey: "gsk_test", groqModel: "llama3-8b-8192" });
+    mockStorage({ apiKey: "gsk_test", groqModel: "openai/gpt-oss-20b" });
     fetchMock.mockResolvedValue({
       ok: true,
       status: 200,
@@ -159,7 +159,7 @@ describe("EVALUATE_PROMPT — backend routing", () => {
     });
     await call({ type: "EVALUATE_PROMPT", payload: { prompt: PROMPT } });
     const body = JSON.parse(fetchMock.mock.calls[0][1].body);
-    expect(body.model).toBe("llama3-8b-8192");
+    expect(body.model).toBe("openai/gpt-oss-20b");
   });
 });
 
@@ -169,7 +169,7 @@ describe("evaluateWithGroq — response handling", () => {
   const PROMPT = "Tell me about the history of machine learning in detail";
 
   beforeEach(() => {
-    mockStorage({ apiKey: "gsk_test", groqModel: "llama-3.3-70b-versatile" });
+    mockStorage({ apiKey: "gsk_test", groqModel: "openai/gpt-oss-120b" });
   });
 
   it("returns the parsed coaching payload on a successful response", async () => {

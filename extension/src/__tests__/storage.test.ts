@@ -13,9 +13,15 @@ describe("getSettings", () => {
     expect(s.sensitivity).toBe(2);
     expect(s.triggerDelay).toBe(1500);
     expect(s.model).toBe("phi4-mini");
-    expect(s.groqModel).toBe("llama-3.3-70b-versatile");
+    expect(s.groqModel).toBe("openai/gpt-oss-120b");
     expect(s.serverPort).toBe(8000);
     expect(s.apiKey).toBe("");
+  });
+
+  it("migrates a saved retired Groq model to the default", async () => {
+    storageGet().mockResolvedValue({ settings: { groqModel: "llama-3.3-70b-versatile" } });
+    const s = await getSettings();
+    expect(s.groqModel).toBe("openai/gpt-oss-120b");
   });
 
   it("returns an empty apiKey by default — new users have no Groq key", async () => {

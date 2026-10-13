@@ -30,7 +30,7 @@ function notifyStateChange(): void {
 export function showCoachingPopup(suggestion: CoachingResponse, inputEl: HTMLElement): void {
   dismissPopup();
 
-  const { host, shadow, stopTracking } = createShadowHost(inputEl);
+  const { host, shadow, stopTracking } = createShadowHost(inputEl, dismissPopup);
   const unmount = mountPopup(shadow, suggestion, inputEl, dismissPopup);
 
   activePopup = {
@@ -53,7 +53,7 @@ export function showCoachingPopup(suggestion: CoachingResponse, inputEl: HTMLEle
 export function showNoChangesPopup(inputEl: HTMLElement): void {
   dismissPopup();
 
-  const { host, shadow, stopTracking } = createShadowHost(inputEl);
+  const { host, shadow, stopTracking } = createShadowHost(inputEl, dismissPopup);
   const unmount = mountNoChangesMessage(shadow, dismissPopup);
 
   activePopup = {
@@ -74,7 +74,7 @@ export function showNoChangesPopup(inputEl: HTMLElement): void {
 export function showOfflinePopup(inputEl: HTMLElement): void {
   dismissPopup();
 
-  const { host, shadow, stopTracking } = createShadowHost(inputEl);
+  const { host, shadow, stopTracking } = createShadowHost(inputEl, dismissPopup);
   const unmount = mountOfflineMessage(shadow, dismissPopup);
 
   activePopup = {
@@ -95,7 +95,7 @@ export function showOfflinePopup(inputEl: HTMLElement): void {
 export function showRateLimitPopup(resetInSeconds: number, inputEl: HTMLElement): void {
   dismissPopup();
 
-  const { host, shadow, stopTracking } = createShadowHost(inputEl);
+  const { host, shadow, stopTracking } = createShadowHost(inputEl, dismissPopup);
   const unmount = mountRateLimitMessage(shadow, resetInSeconds, dismissPopup);
 
   activePopup = {

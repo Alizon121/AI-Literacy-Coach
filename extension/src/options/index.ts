@@ -1,6 +1,7 @@
 import { getSettings, saveSettings } from "../background/storage";
 
-const KNOWN_GROQ_MODELS = ["llama-3.3-70b-versatile", "llama3-8b-8192", "gemma2-9b-it"];
+const KNOWN_GROQ_MODELS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b"];
+const DEFAULT_GROQ_MODEL = KNOWN_GROQ_MODELS[0];
 
 (async () => {
   const settings = await getSettings();
@@ -75,7 +76,7 @@ const KNOWN_GROQ_MODELS = ["llama-3.3-70b-versatile", "llama3-8b-8192", "gemma2-
     try {
       const resolvedGroqModel =
         groqModelSelect.value === "custom"
-          ? groqCustomModelInput.value.trim() || "llama-3.3-70b-versatile"
+          ? groqCustomModelInput.value.trim() || DEFAULT_GROQ_MODEL
           : groqModelSelect.value;
 
       await saveSettings({
